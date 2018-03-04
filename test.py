@@ -53,7 +53,7 @@ if __name__ == "__main__":
                 values = sensor.get_values()
                 if values is not None:
                     printValues(time.time() - last, values, sensor.unit_of_measure)
-                    with open('data.txt', 'w') as f_data:
+                    with open('/var/www/html/pm_data.txt', 'w') as f_data:
                         print(str(values[1]) + '\n' + str(values[0]), file=f_data)
                     break
                 print("Waited %d secs, no values read, we try again" % (time.time() - last1))
