@@ -13,6 +13,7 @@ GNU General Public License for more details.
 
 '''
 import sys
+import os
 import time
 from sds011 import SDS011
 
@@ -28,7 +29,8 @@ def printValues(timing, values, unit_of_measure):
 
 
 sensor = SDS011("/dev/ttyUSB0", timeout=1, unit_of_measure=SDS011.UnitsOfMeasure.MassConcentrationEuropean)
-         
+sensor.reset()     
+
 
 if __name__ == "__main__":            
 
@@ -38,8 +40,6 @@ if __name__ == "__main__":
     print("Current device cycle (0 is permanent on): ", sensor.dutycycle)
     print("Current workstate: ", sensor.workstate)
     print("Current reportmode: ", sensor.reportmode)
-
-    sensor.reset()         
 
     while True:
         try:  # pojedynczy tryb rozgrzewania (okolo 30 sek)

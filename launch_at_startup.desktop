@@ -1,0 +1,5 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Test.py autostart
+Comment=Start a LXTERM terminal and launch test.py
+Exec=/usr/bin/lxterm -e "python3 /home/pi/test.py"
