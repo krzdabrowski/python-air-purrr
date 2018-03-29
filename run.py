@@ -89,13 +89,13 @@ if __name__ == "__main__":
             # send data to ThingSpeak
             payload = "field1=" + str(values[1]) + "&amp;amp;field2=" + str(values[0])
             try:
-                publish.single(topic, payload, hostname=mqtt_host, transport=t_transport, port=t_port)
+                publish.single(topic, payload, hostname=mqtt_host, transport=t_transport, port=t_port, keepalive=3)
             except:
                 print("Error while publishing data")
                 
             # go to sleep
             print("Read was successful. Going to sleep for 15 minutes")
-            time.sleep(45)
+            time.sleep(900)
 
         except KeyboardInterrupt:
             sensor.reset()
@@ -103,3 +103,4 @@ if __name__ == "__main__":
                 print(sensor.workstate, file=f_workstate)
             sensor = None
             sys.exit("Sensor reset due to a KeyboardInterrupt")
+
