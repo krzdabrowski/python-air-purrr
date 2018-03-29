@@ -12,11 +12,11 @@ function login() {
 function work() {
     if ($_POST) {	
 	if($_POST["req"] == "MANUAL=1" || $_POST["req"] == "AUTO=1") {
-		$command = escapeshellcmd('/home/pi/skrypt_on.py');
+		$command = escapeshellcmd('/home/pi/script_on.py');
 		$output = shell_exec($command);
 		echo $output;
 	} else {
-		$command = escapeshellcmd('/home/pi/skrypt_off.py');
+		$command = escapeshellcmd('/home/pi/script_off.py');
 		$output = shell_exec($command);
 		echo $output;
 	}
@@ -42,7 +42,6 @@ if ($_SESSION["AUTH_SUCCESS"] == 0) {
     } else {
         $_SESSION["AUTH_SUCCESS"] = 1;
 	work();
-        echo "gut";
     }
 }
 if ($_SESSION["AUTH_SUCCESS"] == 0) {
