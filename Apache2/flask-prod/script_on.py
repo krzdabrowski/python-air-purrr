@@ -19,6 +19,7 @@ pinList = [14, 15]
 
 
 def turn_on():
+<<<<<<< HEAD:script_on.py
     for i in pinList:
         GPIO.setwarnings(False)
         print("Setup is changing to OUT for pin no. ", i)
@@ -29,16 +30,32 @@ def turn_on():
 =======
     run.sensor.workstate = SDS011.WorkStates.Sleeping
 >>>>>>> 853649c... Alpha release
+=======
+    try:
+        for i in pinList:
+            GPIO.setwarnings(False)
+            print("Setup is changing to OUT for pin no.", i)
+            GPIO.setup(i, GPIO.OUT)
+    
+        run.sensor.workstate = SDS011.WorkStates.Sleeping
+>>>>>>> 2624d3d... Implement Flask webserver instead of PHP:Apache2/flask-prod/script_on.py
 
-    while True:
-    	time.sleep(0.1)
-  
+        while True:
+    	    time.sleep(0.1)
+
+    except KeyboardInterrupt:
+        print("Quitting...") 
+        GPIO.cleanup()
+
+<<<<<<< HEAD:script_on.py
+    try: 
+=======
 
 if __name__ == "__main__":
-
-    try: 
+    try:
+>>>>>>> 2624d3d... Implement Flask webserver instead of PHP:Apache2/flask-prod/script_on.py
         turn_on()
-             
+
     except KeyboardInterrupt:
         print("Quitting...") 
         GPIO.cleanup()

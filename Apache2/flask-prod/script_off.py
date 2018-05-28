@@ -20,6 +20,7 @@ pinList = [14, 15]
 
 
 def turn_off():
+<<<<<<< HEAD:script_off.py
     
     for i in pinList:
         GPIO.setwarnings(False)
@@ -35,11 +36,26 @@ def turn_off():
     test.sensor.workstate = SDS011.WorkStates.Sleeping
     
     
+=======
+    try:    
+        for i in pinList:
+            GPIO.setwarnings(False)
+            print("Setup is changing to IN for pin no.", i)
+            GPIO.setup(i, GPIO.IN)
+
+        run.sensor.workstate = SDS011.WorkStates.Sleeping
+        print("Pins have been clean-up")
+
+    except KeyboardInterrupt:
+        print("Quitting...") 
+        GPIO.cleanup()
+
+             
+>>>>>>> 2624d3d... Implement Flask webserver instead of PHP:Apache2/flask-prod/script_off.py
 if __name__ == "__main__":
-    
     try:
         turn_off()
-             
+
     except KeyboardInterrupt:
         print("Quitting...") 
         GPIO.cleanup()
