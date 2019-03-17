@@ -21,8 +21,11 @@ app.config['BASIC_AUTH_PASSWORD'] = db_helper.get_hashed_password()
 app.config['BASIC_AUTH_FORCE'] = False
 app.config['SECRET_KEY'] = 'super secret key'
 
+@app.route('/')
+def hello():
+    return "Hello HTTPS world"
 
-@app.route('/', methods=['POST'])
+@app.route('/login', methods=['POST'])
 @basic_auth.required
 def login():
     session['logged_in'] = True
@@ -38,4 +41,5 @@ def login():
 
 if __name__ == '__main__':
     app.run()
+
 
