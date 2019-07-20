@@ -5,7 +5,7 @@
 Copyright 2016, Frank Heuer, Germany
 Reuse 2018, Krzysztof Dabrowski, Poland
 
-run.py is designed to run continuously.
+main.py is designed to run continuously.
 It includes warm-up mode (at least 30 secs) so it guarantees as correct as possible results.
 Data is published using ThingSpeak platform.
 Big thumbs-up to Frank for his awesome base code.
