@@ -23,13 +23,16 @@ This is a back-end side of my Air Purrr project. Keep in mind that some codes mi
 * Apache2 configuration [here](https://www.digitalocean.com/community/tutorials/how-to-install-the-apache-web-server-on-debian-9)
 * use Step 2 and Step 4 from [here](https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-apache-in-ubuntu-16-04) to configure basic SSL modules
 * how-to auto-renew SSL certificates with certbot [here](https://www.digitalocean.com/community/tutorials/how-to-secure-apache-with-let-s-encrypt-on-debian-9) or [there](https://www.splitbrain.org/blog/2016-05/14-simple_letsencrypt_on_debian_apache)
+* https://askubuntu.com/a/396048
+* sudo pip3 install Flask-BasicAuth
 <br/><br/>
 
-## Tips & Tricks
+## Tips
 * install ```libapache2-mod-wsgi-py3``` for running Python3 codes
 * use ```WSGIPassAuthorization On``` in ```sites-available/default-ssl.conf``` to pass auth header
 * use ```WSGIDaemonProcess threads=25``` and ```processes=2``` in ```sites-available/default-ssl.conf```
 * use ```chmod 666 data.json``` to enable write permissions for ```data.json```
+sudo chmod 666 /dev/ttyUSB0
 * don't use ```redirect()``` in Flask - it worked in Postman but didn't work in an Android app
 <br/><br/>
 
