@@ -17,17 +17,19 @@ It uses:
 * Cables, jumpers etc.
 * [SKILL WITH MAINS ELECTRICITY](https://www.youtube.com/watch?v=sskSFYxzkpE) - no joke here, this is a must
 
-## Files protips
-
-### Server configuration (Apache2)
+## Apache2 configuration
 * Apache2 configuration [here](https://www.digitalocean.com/community/tutorials/how-to-install-the-apache-web-server-on-debian-9)
 * use Step 2 and Step 4 from [here](https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-apache-in-ubuntu-16-04) to configure basic SSL modules
 * how-to auto-renew SSL certificates with certbot [here](https://www.digitalocean.com/community/tutorials/how-to-secure-apache-with-let-s-encrypt-on-debian-9) or [there](https://www.splitbrain.org/blog/2016-05/14-simple_letsencrypt_on_debian_apache)
+
+## Configuration files Tips & Tricks
+
+### Apache2
 * install ```libapache2-mod-wsgi-py3``` for running Python3 codes
 * use ```WSGIPassAuthorization On``` in ```sites-available/default-ssl.conf``` to pass auth header
 * use ```WSGIDaemonProcess threads=25``` and ```processes=2``` in ```sites-available/default-ssl.conf```
 
-### Server-side code (Flask)
+### Flask
 * use ```chmod 666 data.json``` to enable write permissions for ```data.json```
 * don't use ```redirect()``` in Flask - it worked in Postman but didn't work in an Android app
 
