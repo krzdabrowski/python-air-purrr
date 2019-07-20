@@ -20,32 +20,29 @@ This is a back-end side of my Air Purrr project. Keep in mind that some codes mi
 <br/><br/>
 
 ## First steps
-* Apache2 configuration [here](https://www.digitalocean.com/community/tutorials/how-to-install-the-apache-web-server-on-debian-9)
-* use Step 2 and Step 4 from [here](https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-apache-in-ubuntu-16-04) to configure basic SSL modules
-* how-to auto-renew SSL certificates with certbot [here](https://www.digitalocean.com/community/tutorials/how-to-secure-apache-with-let-s-encrypt-on-debian-9) or [there](https://www.splitbrain.org/blog/2016-05/14-simple_letsencrypt_on_debian_apache)
-* https://askubuntu.com/a/396048
-* sudo pip3 install Flask-BasicAuth
-* [```sudo usermod -a -G tty www-data && sudo usermod -a -G dialout www-data```](https://askubuntu.com/a/133244) && [```sudo usermod -a -G gpio www-data```](https://raspberrypi.stackexchange.com/a/39191)
+* main Apache2 configuration can be found [here](https://www.digitalocean.com/community/tutorials/how-to-install-the-apache-web-server-on-debian-9)
+* for auto-creation of SSL certificate with use of Certbot, please go [here](https://www.digitalocean.com/community/tutorials/how-to-secure-apache-with-let-s-encrypt-on-debian-9)
 <br/><br/>
 
 ## Tips
-* install ```libapache2-mod-wsgi-py3``` for running Python3 codes
-* use ```WSGIPassAuthorization On``` in ```sites-available/default-ssl.conf``` to pass auth header
-* use ```WSGIDaemonProcess threads=25``` and ```processes=2``` in ```sites-available/default-ssl.conf```
-* use ```chmod 666 data.json``` to enable write permissions for ```data.json```
-sudo chmod 666 /dev/ttyUSB0
-* don't use ```redirect()``` in Flask - it worked in Postman but didn't work in an Android app
+* ```sudo apt-get install libapache2-mod-wsgi-py3``` for running Python3 codes
+* ```sudo pip3 install Flask-BasicAuth && sudo pip3 install paho-mqtt``` for missing libraries
+* [```echo "ServerName localhost" | sudo tee /etc/apache2/conf-available/servername.conf```](https://askubuntu.com/a/396048) for dismissing a warning while restarting Apache2
+* [```sudo usermod -a -G tty www-data && sudo usermod -a -G dialout www-data```](https://askubuntu.com/a/133244) && [```sudo usermod -a -G gpio www-data```](https://raspberrypi.stackexchange.com/a/39191) for granting necessary permissions for Apache2 group
+*  ```chmod 666 data.json``` to enable write permissions for ```data.json```
 <br/><br/>
 
 ## Directories
-* ```/etc/apache2/conf-available``` for ```ssl-params.conf``` - some SSL configuration
-* ```/etc/apache2/sites-available``` for ```000-default.conf``` and ```default-ssl.conf``` - **important server configuration for HTTP and HTTPS respectively**
-* ```/etc/ssl/certs``` - **SSL certificates location** (along with CA bundle certficate, both used above)
+* ```/etc/apache2/conf-available``` - some SSL configuration
+* ```/etc/apache2/sites-available``` - **important server configuration for HTTP and HTTPS respectively**
+* ```/etc/ssl/certs``` - SSL certificates location (along with CA bundle certficate, both used above)
 * ```/etc/ssl/private``` - SSL private key location
-* ```/var/www/flask-prod``` - **server-side code for HTTPS (Flask)**
-* ```/var/www/html``` - server-side code for HTTP (plain PHP)
-* ```/var/log/apache2``` - ```access.log``` and ```error.log``` logs
-* ```/home/pi/.config/autostart/lxterm-autostart.desktop``` - autostart
+
+* ```/var/www/airpurrr.eu/flask``` - **server-side code for HTTPS (Flask)**
+* ```/var/www/airpurrr.eu/html``` - server-side code for HTTP
+* ```/var/log/apache2``` - **logs**
+
+* ```/home/pi/.config/autostart/lxterm-autostart.desktop``` - autostart config
 <br/><br/>
 
 ## Charts
