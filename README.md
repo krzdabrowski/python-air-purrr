@@ -27,7 +27,7 @@ This is a back-end side of my Air Purrr project. Keep in mind that some codes mi
 ## Tips
 * ```sudo apt-get install libapache2-mod-wsgi-py3``` for running Python3 codes
 * ```sudo pip3 install Flask-BasicAuth && sudo pip3 install paho-mqtt``` for missing libraries
-* [```echo "ServerName localhost" | sudo tee /etc/apache2/conf-available/servername.conf```](https://askubuntu.com/a/396048) for dismissing a warning while restarting Apache2
+* [```echo "ServerName localhost" | sudo tee /etc/apache2/conf-available/servername.conf```, then ```sudo a2enconf servername```](https://askubuntu.com/a/396048) for dismissing a warning while restarting Apache2
 * [```sudo usermod -a -G tty www-data && sudo usermod -a -G dialout www-data```](https://askubuntu.com/a/133244) && [```sudo usermod -a -G gpio www-data```](https://raspberrypi.stackexchange.com/a/39191) for granting necessary permissions for Apache2 group
 *  ```chmod 666 data.json``` to enable write permissions for ```data.json```
 <br/><br/>
@@ -37,11 +37,9 @@ This is a back-end side of my Air Purrr project. Keep in mind that some codes mi
 * ```/etc/apache2/sites-available``` - **important server configuration for HTTP and HTTPS respectively**
 * ```/etc/ssl/certs``` - SSL certificates location (along with CA bundle certficate, both used above)
 * ```/etc/ssl/private``` - SSL private key location
-
 * ```/var/www/airpurrr.eu/flask``` - **server-side code for HTTPS (Flask)**
 * ```/var/www/airpurrr.eu/html``` - server-side code for HTTP
 * ```/var/log/apache2``` - **logs**
-
 * ```/home/pi/.config/autostart/lxterm-autostart.desktop``` - autostart config
 <br/><br/>
 
