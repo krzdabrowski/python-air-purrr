@@ -25,6 +25,7 @@ This is a back-end side of my Air Purrr project. Keep in mind that some codes mi
 * how-to auto-renew SSL certificates with certbot [here](https://www.digitalocean.com/community/tutorials/how-to-secure-apache-with-let-s-encrypt-on-debian-9) or [there](https://www.splitbrain.org/blog/2016-05/14-simple_letsencrypt_on_debian_apache)
 * https://askubuntu.com/a/396048
 * sudo pip3 install Flask-BasicAuth
+* [```sudo usermod -a -G tty www-data && sudo usermod -a -G dialout www-data```](https://askubuntu.com/a/133244) && [```sudo usermod -a -G gpio www-data```](https://raspberrypi.stackexchange.com/a/39191)
 <br/><br/>
 
 ## Tips
