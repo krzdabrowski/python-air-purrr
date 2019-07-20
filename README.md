@@ -13,26 +13,27 @@ It uses:
 * Raspberry Pi's deconstructed 5V/3A charger
 * [Case](http://allegro.pl/g750-obudowa-uniwersalna-z-abs-i7025164953.html) - I used this one but could be anything
 * [230V fan](http://www.cata.es/en/catalog/a%C3%A9ration/tubular-extraction/duct-in-line/151?_locale=es&_region=lenguage.country.resto.europa) - I used one of these
-* Cables, jumpers etc.
 * Filter mats
+* Cables, jumpers etc.
 * [SKILL WITH MAINS ELECTRICITY](https://www.youtube.com/watch?v=sskSFYxzkpE) - no joke here, this is a must
 
 ## Files protips
 
-### RPi autostart
-* create this file to launch any script at startup: ```/home/pi/.config/autostart/lxterm-autostart.desktop```
+### Server configuration (Apache2)
+* Apache2 configuration [here](https://www.digitalocean.com/community/tutorials/how-to-install-the-apache-web-server-on-debian-9)
+* use Step 2 and Step 4 from [here](https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-apache-in-ubuntu-16-04) to configure basic SSL modules
+* how-to auto-renew SSL certificates with certbot [here](https://www.digitalocean.com/community/tutorials/how-to-secure-apache-with-let-s-encrypt-on-debian-9) or [there](https://www.splitbrain.org/blog/2016-05/14-simple_letsencrypt_on_debian_apache)
+* use ```libapache2-mod-wsgi-py3``` for Python3 codes
+* use ```WSGIPassAuthorization On``` in ```sites-available/default-ssl.conf``` to pass auth header
+* use ```WSGIDaemonProcess threads=25``` and ```processes=2``` in ```sites-available/default-ssl.conf```
 
 ### Server-side code (Flask)
 * use ```chmod 755``` in ```flask-prod``` directory
 * don't use ```redirect()``` in Flask - it worked in Postman but didn't work in an Android app
 
-### Server configuration (Apache2)
-* use Step 2 and Step 4 from [here](https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-apache-in-ubuntu-16-04) to configure basic SSL modules
-* use ```libapache2-mod-wsgi-py3``` for Python3 codes
-* use ```WSGIPassAuthorization On``` in ```sites-available/default-ssl.conf``` to pass auth header
-* use ```WSGIDaemonProcess threads=25``` and ```processes=2``` in ```sites-available/default-ssl.conf```
-* current info about Apache2 configuration [here](https://www.digitalocean.com/community/tutorials/how-to-install-the-apache-web-server-on-debian-9)
-* *for future [read](https://www.digitalocean.com/community/tutorials/how-to-secure-apache-with-let-s-encrypt-on-debian-9) about auto-renew SSL certs with certbot (or [this](https://www.splitbrain.org/blog/2016-05/14-simple_letsencrypt_on_debian_apache))*
+### RPi autostart
+* create this file to launch any script at startup: ```/home/pi/.config/autostart/lxterm-autostart.desktop```
+
 
 ## Directories cheatsheet
 * ```/etc/apache2/conf-available``` for ```ssl-params.conf``` - some SSL configuration
