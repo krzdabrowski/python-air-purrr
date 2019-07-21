@@ -75,7 +75,7 @@ if __name__ == "__main__":
             # warm-up mode
             sensor.workstate = SDS011.WorkStates.Measuring
             # update workstate for an app
-            with open('/var/www/html/data.json', 'w') as file_obj:
+            with open('/var/www/airpurrr.eu/html/data.json', 'w') as file_obj:
                 json_data['workstate'] = str(sensor.workstate)
                 json.dump(json_data, file_obj)
                 # print(sensor.workstate, file=f_workstate)
@@ -89,7 +89,7 @@ if __name__ == "__main__":
                 if values is not None:
                     print_values(time.time() - last, values, sensor.unit_of_measure)
                     # make them online
-                    with open('/var/www/html/data.json', 'w') as file_obj:
+                    with open('/var/www/airpurrr.eu/html/data.json', 'w') as file_obj:
                         json_data['values'] = {}
                         json_data['values']['pm25'] = values[1]
                         json_data['values']['pm10'] = values[0]
@@ -101,7 +101,7 @@ if __name__ == "__main__":
             # sleeping mode
             sensor.workstate = SDS011.WorkStates.Sleeping
             # update workstate for an app
-            with open('/var/www/html/data.json', 'w') as file_obj:
+            with open('/var/www/airpurrr.eu/html/data.json', 'w') as file_obj:
                 json_data['workstate'] = str(sensor.workstate)
                 json.dump(json_data, file_obj)
                 # print(sensor.workstate, file=f_workstate)
@@ -118,10 +118,11 @@ if __name__ == "__main__":
 
         except KeyboardInterrupt:
             sensor.reset()
-            with open('/var/www/html/data.json', 'w') as file_obj:
+            with open('/var/www/airpurrr.eu/html/data.json', 'w') as file_obj:
                 json_data['workstate'] = str(sensor.workstate)
                 json.dump(json_data, file_obj)
                 # print(sensor.workstate, file=file_obj)
             sensor = None
             sys.exit("Sensor reset due to a KeyboardInterrupt")
+
 

@@ -2,4 +2,4 @@
 Encoding=UTF-8
 Name=Main.py autostart
 Comment=Start a LXterminal and launch main.py
-Exec=/usr/bin/lxterminal -e "python3 /var/www/flask/scripts/main.py"
+Exec=/usr/bin/lxterminal -e "python3 /var/www/airpurrr.eu/flask/scripts/main.py"

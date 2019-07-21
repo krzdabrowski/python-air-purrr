@@ -5,7 +5,7 @@ try:
 except RuntimeError:
     print("Error importing RPi.GPIO! This is probably because you need superuser privileges. Try 'sudo' to run this script")
 import time
-import continuous_run as run
+import main
 from sds011 import SDS011
 
 
@@ -21,7 +21,7 @@ def turn_on():
             print("Setup is changing to OUT for pin no.", i)
             GPIO.setup(i, GPIO.OUT)
     
-        run.sensor.workstate = SDS011.WorkStates.Sleeping
+        main.sensor.workstate = SDS011.WorkStates.Sleeping
 
         while True:
     	    time.sleep(0.1)
