@@ -1,37 +1,36 @@
-#!/usr/bin/python3
+#!/usr/bin/python3.7
 
 try:
     import RPi.GPIO as GPIO
 except RuntimeError:
     print("Error importing RPi.GPIO! This is probably because you need superuser privileges. Try 'sudo' to run this script")
-import time
+import sys
 import main
 from sds011 import SDS011
 
 
 # Use BCM GPIO references instead of physical pin numbers
 GPIO.setmode(GPIO.BCM)
-pinList = [14, 15]
+pin_list = [14, 15]
 
-
-def turn_off():
-    try:    
-        for i in pinList:
+def change_state(should_turn_on):
+    gpio_state = GPIO.OUT if should_turn_on == "on" else GPIO.IN
+    
+    try:
+        for i in pin_list:
             GPIO.setwarnings(False)
-            print("Setup is changing to IN for pin no.", i)
-            GPIO.setup(i, GPIO.IN)
-
+            GPIO.setup(i, gpio_state)
+    
         main.sensor.workstate = SDS011.WorkStates.Sleeping
-        print("Pins have been clean-up")
 
     except KeyboardInterrupt:
         print("Quitting...") 
         GPIO.cleanup()
 
-             
+
 if __name__ == "__main__":
     try:
-        turn_off()
+        change_state(sys.argv[1])
 
     except KeyboardInterrupt:
         print("Quitting...") 

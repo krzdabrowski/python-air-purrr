@@ -1,18 +1,17 @@
-#!/usr/bin/python3
-# -*- coding: utf-8 -*-
+#!/usr/bin/python3.7
 
 '''
 Copyright 2016, Frank Heuer, Germany
 Reuse 2018, Krzysztof Dabrowski, Poland
+Refactor 2019, Krzysztof Dabrowski, Poland
 
-main.py is designed to run continuously.
+Main.py is designed to run continuously.
 It includes warm-up mode (at least 30 secs) so it guarantees as correct as possible results.
 Data is published using ThingSpeak platform.
-Big thumbs-up to Frank for his awesome base code.
-Original code: http://gitlab.com/frankrich/sds011_particle_sensor
+Big thumbs-up to Frank for his awesome codebase - http://gitlab.com/frankrich/sds011_particle_sensor
 
 This is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+But WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 '''
@@ -23,7 +22,6 @@ import time
 import json
 import paho.mqtt.publish as publish
 from sds011 import SDS011
-from timeout import timeout
 
 
 # create instance of sensor & clear it
@@ -53,7 +51,6 @@ def print_values(timing, values, unit_of_measure):
     return None
 
 
-@timeout(5)
 def publish_to_thingspeak():
     publish.single(topic, payload, hostname=mqtt_host, transport=t_transport, port=t_port)
     return None
@@ -108,7 +105,7 @@ if __name__ == "__main__":
             # send data to ThingSpeak
             payload = "field1=" + str(values[1]) + "&amp;amp;field2=" + str(values[0])
             try:
-                publish_to_thingspeak() # timeout set: 5 secs
+                publish_to_thingspeak()
             except:
                 print("Error or timeout while publishing data")
                 
