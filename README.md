@@ -26,7 +26,7 @@ This is a back-end side of my Air Purrr project. Keep in mind that some codes mi
 
 ## Tips
 * ```sudo apt-get install libapache2-mod-wsgi-py3``` for running Python3 codes
-* ```sudo pip3 install Flask-BasicAuth && sudo pip3 install paho-mqtt``` for missing libraries
+* ```sudo pip3 install Flask-BasicAuth && sudo pip3 install flask-bcrypt && sudo pip3 install paho-mqtt``` for missing libraries
 * [```echo "ServerName localhost" | sudo tee /etc/apache2/conf-available/servername.conf```, then ```sudo a2enconf servername```](https://askubuntu.com/a/396048) for dismissing a warning while restarting Apache2
 * [```sudo usermod -a -G tty www-data && sudo usermod -a -G dialout www-data```](https://askubuntu.com/a/133244) && [```sudo usermod -a -G gpio www-data```](https://raspberrypi.stackexchange.com/a/39191) for granting necessary permissions for Apache2 group
 *  ```chmod 666 data.json``` to enable write permissions for ```data.json```
