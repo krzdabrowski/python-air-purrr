@@ -1,6 +1,6 @@
 # Air Purrr - back-end
 
-This is a back-end side of my Air Purrr project. Keep in mind that some codes might need some improvements/refactoring in the future.
+This is a back-end side of my Air Purrr project.
 
 <img src="https://i.imgur.com/krAfhpc.jpg" width="430"> <img src="https://i.imgur.com/cbJ3k2f.jpg" width="430">
 <br/><br/>
@@ -8,8 +8,8 @@ This is a back-end side of my Air Purrr project. Keep in mind that some codes mi
 ## Air Purifier components
 * [Raspberry Pi 3](https://www.raspberrypi.org/products/raspberry-pi-3-model-b/) - The mini-computer with Apache2 server on it
 * [Nova Fitness SDS011](https://www.aliexpress.com/item/nova-PM-sensor-SDS011-High-precision-laser-pm2-5-air-quality-detection-sensor-module-Super-dust/32617788139.html?spm=a2g17.10010108.1000016.1.cfbe645O7s0gk&isOrigTitle=true) - PM2.5/10 detector
-* ~~[QinHeng Electronics HL-340](https://www.aliexpress.com/item/nova-PM-sensor-SDS011-High-precision-laser-pm2-5-air-quality-detection-sensor-module-Super-dust/32617788139.html?spm=a2g17.10010108.1000016.1.cfbe645O7s0gk&isOrigTitle=true) - default USB-Serial adapter~~ - DON'T use it! unless you want to have some uncool bugs
-* [Prolific PL2303](https://www.waveshare.com/product/PL2303-USB-UART-Board-type-A.htm) - use this one (or anything based on PL2303)! it seems bug-free for now
+* ~~[QinHeng Electronics HL-340](https://www.aliexpress.com/item/nova-PM-sensor-SDS011-High-precision-laser-pm2-5-air-quality-detection-sensor-module-Super-dust/32617788139.html?spm=a2g17.10010108.1000016.1.cfbe645O7s0gk&isOrigTitle=true) - default USB-Serial adapter~~ - DON'T use it! It's a buggy device
+* [Prolific PL2303](https://www.waveshare.com/product/PL2303-USB-UART-Board-type-A.htm) - use this one (or anything based on, for example, PL2303)!
 * 2-channel relay board - to control the fan
 * Raspberry Pi's deconstructed 5V/3A charger
 * [Case](http://allegro.pl/g750-obudowa-uniwersalna-z-abs-i7025164953.html) - I used this one but could be anything
@@ -30,6 +30,7 @@ This is a back-end side of my Air Purrr project. Keep in mind that some codes mi
 * [```echo "ServerName localhost" | sudo tee /etc/apache2/conf-available/servername.conf```, then ```sudo a2enconf servername```](https://askubuntu.com/a/396048) for dismissing a warning while restarting Apache2
 * [```sudo usermod -a -G tty www-data && sudo usermod -a -G dialout www-data```](https://askubuntu.com/a/133244) && [```sudo usermod -a -G gpio www-data```](https://raspberrypi.stackexchange.com/a/39191) for granting necessary permissions for Apache2 group
 *  ```chmod 666 data.json``` to enable write permissions for ```data.json```
+* ```chmod 444 db.txt``` to restrict access for ```db.txt``` (at the end of configuration)
 <br/><br/>
 
 ## Directories
