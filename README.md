@@ -29,8 +29,8 @@ This is a back-end side of my Air Purrr project.
 * ```sudo pip3 install Flask-BasicAuth && sudo pip3 install flask-bcrypt && sudo pip3 install paho-mqtt``` for missing libraries
 * [```echo "ServerName localhost" | sudo tee /etc/apache2/conf-available/servername.conf```, then ```sudo a2enconf servername```](https://askubuntu.com/a/396048) for dismissing a warning while restarting Apache2
 * [```sudo usermod -a -G tty www-data && sudo usermod -a -G dialout www-data```](https://askubuntu.com/a/133244) && [```sudo usermod -a -G gpio www-data```](https://raspberrypi.stackexchange.com/a/39191) for granting necessary permissions for Apache2 group
-*  ```chmod 666 data.json``` to enable write permissions for ```data.json```
-* ```chmod 444 db.txt``` to restrict access for ```db.txt``` (at the end of configuration)
+*  ```sudo chmod 666 data.json``` to enable write permissions for ```data.json```
+* ```sudo chmod 444 db.txt``` to restrict access for ```db.txt``` (at the end of configuration)
 <br/><br/>
 
 ## Directories
