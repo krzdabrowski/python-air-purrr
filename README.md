@@ -25,6 +25,7 @@ This is a back-end side of my Air Purrr project.
 <br/><br/>
 
 ## Tips
+* [```sudo apt-get install fail2ban```](https://webinsider.pl/linux-firewall-fail2ban/) with proper configuration for blocking bruteforce bots
 * ```sudo apt-get install libapache2-mod-wsgi-py3``` for running Python3 codes
 * ```sudo pip3 install Flask-BasicAuth && sudo pip3 install flask-bcrypt && sudo pip3 install paho-mqtt``` for missing libraries
 * [```echo "ServerName localhost" | sudo tee /etc/apache2/conf-available/servername.conf```, then ```sudo a2enconf servername```](https://askubuntu.com/a/396048) for dismissing a warning while restarting Apache2
