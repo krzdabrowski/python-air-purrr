@@ -5,9 +5,9 @@ try:
 except RuntimeError:
     print('Error importing RPi.GPIO! This is probably because you need superuser privileges. Try "sudo" to run this script')
 import sys
-import main
 from sds011 import SDS011
 
+sensor = SDS011('/dev/ttyUSB0')
 
 # Use BCM GPIO references instead of physical pin numbers
 GPIO.setmode(GPIO.BCM)
@@ -21,7 +21,8 @@ def change_state(should_turn_on):
             GPIO.setwarnings(False)
             GPIO.setup(i, gpio_state)
     
-        main.sensor.workstate = SDS011.WorkStates.Sleeping
+        if (sensor.workstate != SDS011.WorkStates.Sleeping):
+            sensor.workstate = SDS011.WorkStates.Sleeping
 
     except KeyboardInterrupt:
         print('Quitting...') 

@@ -23,7 +23,7 @@ import paho.mqtt.publish as publish
 from sds011 import SDS011
 
 
-sensor = SDS011('/dev/ttyUSB0', timeout=5, unit_of_measure=SDS011.UnitsOfMeasure.MassConcentrationEuropean)
+sensor = SDS011('/dev/ttyUSB0')
 json_data = {}
 
 def init():

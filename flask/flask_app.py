@@ -19,7 +19,7 @@ def login(request_auth_header_username, request_auth_header_password):
         with open(db_path, 'r') as f:            
             check_login = bcrypt.check_password_hash(f.readline().rstrip('\n'), request_auth_header_username)
             check_password = bcrypt.check_password_hash(f.readline().rstrip('\n'), request_auth_header_password)
-            
+
         return check_login and check_password
                 
     else:
@@ -33,9 +33,10 @@ def login(request_auth_header_username, request_auth_header_password):
 @auth.login_required
 def control():
     control_purifier.change_state(request.form['shouldTurnOn'])
-    
+
     return 'Success'
 
 
 if __name__ == '__main__':
     app.run()
+    

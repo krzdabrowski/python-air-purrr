@@ -38,8 +38,11 @@ This module contains the SDS011 class for controlling
 the sds011 particle matter sensor from Nova using the HL-340-serial TTL USB adapter
 """
 
-# this module has been updated by Teus Hagen May 2017
-# all errors introduced with this update come from teus
+# this module has been updated by Teus Hagen in May 2017
+# all errors introduced with this update come from Teus
+
+# this module has been updated again by Krzysztof Dabrowski in July 2019
+# hope it will not break any crucial functionalities
 
 from enum import IntEnum
 import logging
@@ -107,7 +110,7 @@ class SDS011(object):
         In passive mode one has to send a request command,
         in order to get the measurement values as a response.'''
         Initiative = 0,
-        Passiv = 1
+        Passive = 1
 
     class WorkStates(IntEnum):
         '''the Work states:
@@ -128,26 +131,31 @@ class SDS011(object):
         '''
         # µg / m³, the mode of the sensors firmware
         MassConcentrationEuropean = 0,
-        # pcs/0.01 cft (particles / 0.01 cubic foot )
-        ParticelConcentrationImperial = 1
-    # Constructor
+        # pcs/0.01 cft (particles / 0.01 cubic foot)
+        ParticleConcentrationImperial = 1
 
+    # Constructor
     def __init__(self, device_path, **args):
+        logging.info("Start of SDS011 constructor. The device_path: %s", device_path)
+        
         '''
         The device_path on Win is one of your COM ports.
         On Linux one of "/dev/ttyUSB..." or "/dev/ttyAMA..."
         '''
-        logging.info("Start of SDS011 constructor. The device_path: %s", device_path)
-        self.__timeout = 2
+        self.__device_path = device_path
+
+        '''Set default values for my taste'''
+        self.__timeout = 5
+        self.__unit_of_measure = self.UnitsOfMeasure.MassConcentrationEuropean
+
         if 'timeout' in args.keys():            # serial line read timeout
             self.__timeout = int(args['timeout'])
-        self.__unit_of_measure = self.UnitsOfMeasure.MassConcentrationEuropean
         if 'unit_of_measure' in args.keys():      # in mass or values in concentration
             if isinstance(args['unit_of_measure'], self.UnitsOfMeasure):
                 self.__unit_of_measure = args['unit_of_measure']
             else:
                 raise ValueError("unit_of_measure give is not of type SDS011.UnitOfMeasure.")
-        self.__device_path = device_path
+            
         self.device = None
         try:
             self.device = serial.Serial(device_path,
@@ -163,7 +171,7 @@ class SDS011(object):
             raise IOError("SDS011: unable to set serial device %s" %
                           device_path)
 
-        # ToDo: initiate whith the values, the sensor has to be queried for
+        # ToDo: initiate with the values, the sensor has to be queried for
         # that
         self.__firmware = None
         self.__reportmode = None
@@ -173,6 +181,7 @@ class SDS011(object):
         self.__read_timeout = 0
         self.__dutycycle_start = time.time()
         self.__read_timeout_drift_percent = 2
+        
         # within response the __device_id will be set
         first_response = self.__response()
         if len(first_response) == 0:
@@ -197,44 +206,17 @@ class SDS011(object):
         logging.info("SDS011 Sensor device ID: %s", self.device_id)
         logging.log(16, "The SDS011 constructor is successfully executed.")
 
-    # conversion parameters come from:
-    # http://ir.uiowa.edu/cgi/viewcontent.cgi?article=5915&context=etd
-    def mass2particles(self, pm, value):
-        """Convert pm size from µg/m3 back to concentration pcs/0.01sqf"""
-        if self.__unit_of_measure == self.UnitsOfMeasure.MassConcentrationEuropean:
-            return value
-        elif self.__unit_of_measure == self.UnitsOfMeasure.ParticelConcentrationImperial:
-
-            pi = 3.14159
-            density = 1.65 * pow(10, 12)
-
-            if pm == 'pm10':
-                radius = 2.60
-            elif pm == 'pm2.5':
-                radius = 0.44
-            else:
-                raise RuntimeError('SDS011 Wrong Mass2Particle parameter value for pm.\n \
-                                    "%s" given, "pm10" or "pm2.5" expected.' % pm)
-            radius *= pow(10, -6)
-            volume = (4.0 / 3.0) * pi * pow(radius, 3)
-            mass = density * volume
-            K = 3531.5
-            concentration = value / (K * mass)
-            return int(concentration + 0.5)
-
     # Destructor
     def __del__(self):
         # it's better to clean up
         if self.device is not None:
             self.device.close()
 
-    # ReportMode
     @property
     def device_path(self):
         """The device path of the sensor"""
         return self.__device_path
 
-    # ReportMode
     @property
     def reportmode(self):
         """The report mode, the sensor has at the moment"""
@@ -252,7 +234,6 @@ class SDS011(object):
         else:
             raise TypeError("Report mode must be of type SDS011.ReportModes")
 
-    # workstate
     @property
     def workstate(self):
         """The workstate of the sensor as a value of type self.WorkStates"""
@@ -268,7 +249,6 @@ class SDS011(object):
             logging.info("workstate setted: %s", value)
         else:
             raise TypeError("Report Mode must be of type SDS011.WorkStates")
-    # dutycycle
 
     @property
     def dutycycle(self):
@@ -277,7 +257,6 @@ class SDS011(object):
 
     @dutycycle.setter
     def dutycycle(self, value):
-
         if (isinstance(value, int) or
                 value is None):
             if value < 0 or value > 30:
@@ -309,6 +288,7 @@ class SDS011(object):
     def unit_of_measure(self):
         """The unit of measure the sensor returns the values"""
         return self.__unit_of_measure
+
     @property
     def timeout(self):
         return self.__timeout
@@ -316,7 +296,7 @@ class SDS011(object):
     def __construct_data(self, cmdmode, cmdvalue):
         '''Construct a data byte array from cmdmode and cmdvalue.
         cmdvalue has to be self.CommandMode type and cmdvalue int.
-        Returns byte arry of length 2'''
+        Returns byte array of length 2'''
         if not isinstance(cmdmode, self.CommandMode):
             raise TypeError(
                 "SDS011 cmdmode must be of type {0}", type(self.CommandMode))
@@ -336,7 +316,6 @@ class SDS011(object):
         response = self.__send(self.Command.DutyCycle,
                                self.__construct_data(self.CommandMode.Getting, 0))
         if response is not None and len(response) > 0:
-
             dutycycle = response[1]
             self.__dutycycle = dutycycle
             self.__read_timeout = self.__calculate_read_timeout(dutycycle)
@@ -372,13 +351,19 @@ class SDS011(object):
                      timeoutvalue, newtimeout)
         return newtimeout
 
+    def request(self):
+        '''Request measurement data as a tuple from sensor when its in ReportMode.Passive'''
+        response = self.__send(self.Command.Request, bytearray())
+        retval = self.__extract_values_from_response(response)
+        return retval
+
     def get_values(self):
         '''Get the sensor response and return measured value of PM10 and PM25'''
         logging.log(16, "SDS011 get get_values entered")
         if self.__workstate == self.WorkStates.Sleeping:
             raise RuntimeError("The SDS011 sensor is sleeping and will not " +
                                "send any values. Will wake it up first.")
-        if self.__reportmode == self.ReportModes.Passiv:
+        if self.__reportmode == self.ReportModes.Passive:
             raise RuntimeError("The SDS011 sensor is in passive report mode "
                                "and will not automaticly send values. "
                                "You need to call Request() to get values.")
@@ -394,14 +379,8 @@ class SDS011(object):
         raise IOError(
             "SDS011 No data within read timeout of %d has been received." % self.__read_timeout)
 
-    def request(self):
-        """Request measurement data as a tuple from sensor when its in ReporMode.Passiv"""
-        response = self.__send(self.Command.Request, bytearray())
-        retval = self.__extract_values_from_response(response)
-        return retval
-
     def __extract_values_from_response(self, response_data):
-        """Extracts the value of PM25 and PM10 from sensor response"""
+        '''Extracts the value of PM25 and PM10 from sensor response'''
         data = response_data[2:6]
         value_of_2point5micro = None
         value_of_10micro = None
@@ -472,11 +451,12 @@ class SDS011(object):
                 Received:\"{1}\"".format(self.__ReceiveByte, received[1]))
         # check, if response is response of the command, except Command.Request
         if command is not self.Command.Request:
-            if received[2] != command.value:
-                raise ValueError(
-                    "SDS011 respomse does not belong to the command sent afore.")
-            else:
-                returnvalue = received[3: -2]
+            # IMPORTANT! commented due to some conflict of interest between SDS011 and GPIO ports
+            # if received[2] != command.value:
+                # raise ValueError(
+                #    "SDS011 response does not belong to the command sent afore.")
+            # else:
+            returnvalue = received[3: -2]
         else:
             returnvalue = received
         # return just the received data. Further evaluation of data outsite
@@ -521,10 +501,11 @@ class SDS011(object):
         if command is not None and command is not self.Command.Request:
             if bytes_received[1] is not self.__ResponseByte:
                 raise IOError("SDS011 no ResponseByte found in the response.")
-            if bytes_received[2] != command.value:
-               raise IOError(
-                   "Third byte of serial data \"{0}\" received is not the expected response \
-                   to the previous command: \"{1}\"".format(bytes_received[2], command.name))
+            # IMPORTANT! commented due to some conflict of interest between SDS011 and GPIO ports
+            # if bytes_received[2] != command.value:
+            #    raise IOError(
+            #        "Third byte of serial data \"{0}\" received is not the expected response \
+            #        to the previous command: \"{1}\"".format(bytes_received[2], command.name))
         if command is None or command is self.Command.Request:
             if bytes_received[1] is not self.__ReceiveByte:
                 raise IOError("SDS011 Received byte not found on the Value Request.")
@@ -540,15 +521,6 @@ class SDS011(object):
                              bytes_received, bytes_received[-4:-2], self.__device_id)
         logging.log(18, "SDS011 The response() was successful")
         return bytes_received
-
-    def reset(self):
-        '''
-        Sets Report mode to Initiative. Workstate to Measuring and Duty cyle to 0
-        '''
-        self.workstate = self.WorkStates.Measuring
-        self.reportmode = self.ReportModes.Initiative
-        self.dutycycle = 0
-        logging.info("Sensor resetted")
 
     def __checksum_make(self, data):
         '''
@@ -577,3 +549,35 @@ class SDS011(object):
         checksum = checksum % 256
         logging.log(14, "SDS011 Checksum calculated is {}.".format(checksum))
         return checksum
+
+    # conversion parameters come from:
+    # http://ir.uiowa.edu/cgi/viewcontent.cgi?article=5915&context=etd
+    def mass2particles(self, pm, value):
+        """Convert pm size from µg/m3 back to concentration pcs/0.01sqf"""
+        if self.__unit_of_measure == self.UnitsOfMeasure.MassConcentrationEuropean:
+            return value
+        elif self.__unit_of_measure == self.UnitsOfMeasure.ParticleConcentrationImperial:
+
+            pi = 3.14159
+            density = 1.65 * pow(10, 12)
+
+            if pm == 'pm10':
+                radius = 2.60
+            elif pm == 'pm2.5':
+                radius = 0.44
+            else:
+                raise RuntimeError('SDS011 Wrong Mass2Particle parameter value for pm.\n \
+                                    "%s" given, "pm10" or "pm2.5" expected.' % pm)
+            radius *= pow(10, -6)
+            volume = (4.0 / 3.0) * pi * pow(radius, 3)
+            mass = density * volume
+            K = 3531.5
+            concentration = value / (K * mass)
+            return int(concentration + 0.5)
+
+    def reset(self):
+        '''Sets Report mode to Initiative. Workstate to Measuring and Duty cycle to 0'''
+        self.workstate = self.WorkStates.Measuring
+        self.reportmode = self.ReportModes.Initiative
+        self.dutycycle = 0
+        logging.info("Sensor resetted")
