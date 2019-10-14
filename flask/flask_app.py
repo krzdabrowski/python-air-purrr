@@ -29,12 +29,29 @@ def login(request_auth_header_username, request_auth_header_password):
             
         return False
 
-@app.route('/login', methods=['POST'])
+@app.route('/control-on-off', methods=['POST'])
 @auth.login_required
-def control():
-    control_purifier.change_state(request.form['shouldTurnOn'])
+def control_turning_on_off():
+    is_on_or_off = request.form['onOff']
+    
+    if is_on_or_off == 'on':
+        control_purifier.turn_on()
+    else:
+        control_purifier.turn_off()
 
-    return 'Success'
+    return 'Turning on/off returns Success'
+    
+@app.route('/control-high-low', methods=['POST'])
+@auth.login_required
+def control_switching_low_high_modes():
+    is_high_or_low = request.form['highLow']
+    
+    if is_high_or_low == 'high':
+        control_purifier.high_mode()
+    else:
+        control_purifier.low_mode()
+
+    return 'Swiotching high/low modes returns Success'
 
 
 if __name__ == '__main__':

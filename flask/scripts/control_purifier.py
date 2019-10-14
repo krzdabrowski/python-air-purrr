@@ -5,34 +5,76 @@ try:
 except RuntimeError:
     print('Error importing RPi.GPIO! This is probably because you need superuser privileges. Try "sudo" to run this script')
 import sys
+import time
 from sds011 import SDS011
 
 sensor = SDS011('/dev/ttyUSB0')
 
-# Use BCM GPIO references instead of physical pin numbers
-GPIO.setmode(GPIO.BCM)
-pin_list = [14, 15]
+# use board pin references
+GPIO.setmode(GPIO.BOARD)
+GPIO.setwarnings(False)
 
-def change_state(should_turn_on):
-    gpio_state = GPIO.OUT if should_turn_on == 'on' else GPIO.IN
-    
-    try:
-        for i in pin_list:
-            GPIO.setwarnings(False)
-            GPIO.setup(i, gpio_state)
-    
-        if (sensor.workstate != SDS011.WorkStates.Sleeping):
-            sensor.workstate = SDS011.WorkStates.Sleeping
+# pins to control each purifier's behaviour:
+# * to turn it on: (11, 13)
+# * to turn it off: 16, then (11, 13, 15)
+# * to change between low-high mode: (15, 16)
+# DO NOT CHANGE THESE PINS
+pins_tuple = (11, 13, 15, 16)
 
-    except KeyboardInterrupt:
-        print('Quitting...') 
-        GPIO.cleanup()
+
+def turn_on():
+    print('Turning purifier on...')
+    
+    GPIO.setup(pins_tuple[0:2], GPIO.OUT)
+    GPIO.output(pins_tuple[0:2], GPIO.LOW)
+    
+    set_sensor_to_sleep()
+
+def turn_off():
+    print('Turning purifer off...')
+    
+    GPIO.setup(pins_tuple, GPIO.OUT)
+    GPIO.output(pins_tuple[-1], GPIO.HIGH)  # pin 16 first
+    time.sleep(1)  # security purpose
+    GPIO.output(pins_tuple[0:3], GPIO.HIGH)
+    
+    set_sensor_to_sleep()
+    
+def high_mode():
+    print('Switching to high (performance) mode...')
+    
+    GPIO.setup(pins_tuple[2:], GPIO.OUT)
+    
+    GPIO.output(pins_tuple[2], GPIO.LOW)  # pin 15
+    time.sleep(1)
+    GPIO.output(pins_tuple[3], GPIO.LOW)  # pin 16
+    
+    set_sensor_to_sleep()    
+    
+def low_mode():
+    print('Switching to low (night) mode...')
+    
+    GPIO.setup(pins_tuple[2:], GPIO.OUT)
+    
+    GPIO.output(pins_tuple[3], GPIO.HIGH) # pin 16
+    time.sleep(1)
+    GPIO.output(pins_tuple[2], GPIO.HIGH) # pin 15
+    
+    set_sensor_to_sleep()
+    
+
+def set_sensor_to_sleep():
+    if (sensor.workstate != SDS011.WorkStates.Sleeping):
+        sensor.workstate = SDS011.WorkStates.Sleeping
 
 
 if __name__ == '__main__':
     try:
-        change_state(sys.argv[1])
+        turn_on() if sys.argv[1] == 'on' else turn_off()
 
     except KeyboardInterrupt:
         print('Quitting...') 
         GPIO.cleanup()
+        
+    finally:
+        set_sensor_to_sleep()
