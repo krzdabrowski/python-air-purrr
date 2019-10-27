@@ -1,5 +1,5 @@
 [Desktop Entry]
 Encoding=UTF-8
-Name=Continuous_run.py autostart
-Comment=Start a LXTERM terminal and launch continuous_run.py
-Exec=/usr/bin/lxterm -e "python3 /var/www/flask-prod/continuous_run.py"
+Name=Main.py autostart
+Comment=Start a LXterminal and launch main.py
+Exec=/usr/bin/lxterminal -e "python3 /var/www/airpurrr.eu/flask/scripts/main.py"
