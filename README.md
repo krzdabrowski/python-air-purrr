@@ -2,7 +2,7 @@
 
 This is a back-end side of my Air Purrr project.
 
-<img src="https://i.imgur.com/krAfhpc.jpg" width="430"> <img src="https://i.imgur.com/cbJ3k2f.jpg" width="430">
+<img src="https://raw.githubusercontent.com/krzdabrowski/backend-air-purrr/master/air_purifier.JPG" width="430"> <img src="https://raw.githubusercontent.com/krzdabrowski/backend-air-purrr/master/device_inside.JPG" width="430">
 <br/><br/>
 
 ## Air Purifier components
