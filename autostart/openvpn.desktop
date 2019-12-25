@@ -1,0 +1,5 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=OpenVPN autostart
+Comment=Start a LXterminal and run OpenVPN mikrotik.conf
+Exec=/usr/bin/lxterminal -e "sleep 15; cd /etc/openvpn/client; sudo openvpn mikrotik.conf; bash"
