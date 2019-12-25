@@ -31,12 +31,12 @@ def init():
     sensor.dutycycle = 1  # how much minute(s) SDS011 will wait before the measurement (maximum)
 
 def save_workstate_to_json():
-    with open('/var/www/airpurrr.eu/html/data.json', 'w') as f:
+    with open('/var/www/airpurrr.eu/flask/static/data.json', 'w') as f:
         json_data['workstate'] = str(sensor.workstate)
         json.dump(json_data, f)
         
 def save_values_to_json(values):
-    with open('/var/www/airpurrr.eu/html/data.json', 'w') as f:
+    with open('/var/www/airpurrr.eu/flask/static/data.json', 'w') as f:
         json_data['values'] = {}
         json_data['values']['pm25'] = values[1]
         json_data['values']['pm10'] = values[0]
