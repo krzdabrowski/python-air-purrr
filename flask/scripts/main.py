@@ -19,16 +19,18 @@ GNU General Public License for more details.
 import sys
 import time
 import json
+import requests
 import paho.mqtt.publish as publish
 from sds011 import SDS011
 
-
 sensor = SDS011('/dev/ttyUSB0')
 json_data = {}
+database_url = 'http://backend.airpurrr.eu:8086/write?db=airquality_sds011'
 
 def init():
     sensor.reset()
     sensor.dutycycle = 1  # how much minute(s) SDS011 will wait before the measurement (maximum)
+    save_values_to_json([0.0, 0.0])
 
 def save_workstate_to_json():
     with open('/var/www/airpurrr.eu/flask/static/data.json', 'w') as f:
@@ -45,7 +47,6 @@ def save_values_to_json(values):
 def set_measure_mode():
     sensor.workstate = SDS011.WorkStates.Measuring
     save_workstate_to_json()
-    save_values_to_json([0.0, 0.0])
 
 def get_values():
     print(f'\n1. Trying to get some values:')
@@ -61,16 +62,28 @@ def get_values():
             save_values_to_json(values)
             return values
 
+def send_values_to_influxdb(values):
+    print('3. Read completed. Sending values to database...')
+
+    try:
+        requests.post(url=database_url, data=f'indoors_pollution pm25={values[1]},pm10={values[0]}')
+    except:
+        print('Error sending data to InfluxDB')
+
+
 def publish_to_thingspeak(payload):
-    print('3. Read completed. Publishing data to ThingSpeak...')
+    print('4. Publishing data to ThingSpeak...')
 
     with open('/home/pi/Desktop/db/write_api_key.txt', 'r') as api_key:
         write_api_key = api_key.read()
-    publish.single('channels/462987/publish/' + write_api_key, payload, hostname='mqtt.thingspeak.com', transport='websockets', port=80)
+    try:
+        publish.single('channels/462987/publish/' + write_api_key, payload, hostname='mqtt.thingspeak.com', transport='websockets', port=80)
+    except:
+        print('Error publishing data to ThingSpeak')
 
 def go_to_sleep():
-    print('4. Publishing completed. See you in 15 minutes!')
-    time.sleep(60 * 15)
+    print('5. Publishing completed. See you in 15 minutes!')
+    time.sleep(29)  # 30 secs
 
 
 if __name__ == '__main__':
@@ -83,8 +96,10 @@ if __name__ == '__main__':
             
             sensor.workstate = SDS011.WorkStates.Sleeping
             save_workstate_to_json()
-
+            
+            send_values_to_influxdb(values)
             publish_to_thingspeak('field1=' + str(values[1]) + '&field2=' + str(values[0]))
+            
             go_to_sleep()
 
         except KeyboardInterrupt:
