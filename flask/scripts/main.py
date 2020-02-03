@@ -17,6 +17,7 @@ GNU General Public License for more details.
 '''
 
 import sys
+import os
 import time
 import json
 import requests
@@ -25,20 +26,37 @@ from sds011 import SDS011
 
 sensor = SDS011('/dev/ttyUSB0')
 json_data = {}
+
 database_url = 'http://backend.airpurrr.eu:8086/write?db=airquality_sds011'
+database_location = '/home/pi/Desktop/db/cached_db.txt'
+json_location = '/var/www/airpurrr.eu/flask/static/data.json'
+api_key_location = '/home/pi/Desktop/db/write_api_key.txt'
 
 def init():
     sensor.reset()
     sensor.dutycycle = 1  # how much minute(s) SDS011 will wait before the measurement (maximum)
     save_values_to_json([0.0, 0.0])
+    
+def send_cached_values_to_influxdb_if_any():
+    is_cache_empty = os.stat(database_location).st_size == 0
+    
+    if not is_cache_empty:
+        try:
+            print('Sending cache to InfluxDB...')
+            with open(database_location, 'r') as cache:
+                requests.post(url=database_url, data=cache.read())
+            print('Send completed, CLEANING CACHE!!!')
+            with open(database_location, 'w'): pass
+        except:
+            print('Error sending CACHE to InfluxDB!')
 
 def save_workstate_to_json():
-    with open('/var/www/airpurrr.eu/flask/static/data.json', 'w') as f:
+    with open(json_location, 'w') as f:
         json_data['workstate'] = str(sensor.workstate)
         json.dump(json_data, f)
         
 def save_values_to_json(values):
-    with open('/var/www/airpurrr.eu/flask/static/data.json', 'w') as f:
+    with open(json_location, 'w') as f:
         json_data['values'] = {}
         json_data['values']['pm25'] = values[1]
         json_data['values']['pm10'] = values[0]
@@ -64,17 +82,19 @@ def get_values():
 
 def send_values_to_influxdb(values):
     print('3. Read completed. Sending values to database...')
+    data_formatted = f'indoors_pollution pm25={values[1]},pm10={values[0]}'
 
     try:
-        requests.post(url=database_url, data=f'indoors_pollution pm25={values[1]},pm10={values[0]}')
+        requests.post(url=database_url, data=data_formatted)
     except:
-        print('Error sending data to InfluxDB')
-
+        print('Error sending data to InfluxDB, appending to cache...')
+        with open(database_location, 'a') as cache:
+            cache.write(f'{data_formatted} {time.time_ns()}\n')
 
 def publish_to_thingspeak(payload):
     print('4. Publishing data to ThingSpeak...')
 
-    with open('/home/pi/Desktop/db/write_api_key.txt', 'r') as api_key:
+    with open(api_key_location, 'r') as api_key:
         write_api_key = api_key.read()
     try:
         publish.single('channels/462987/publish/' + write_api_key, payload, hostname='mqtt.thingspeak.com', transport='websockets', port=80)
@@ -88,6 +108,7 @@ def go_to_sleep():
 
 if __name__ == '__main__':
     init()
+    send_cached_values_to_influxdb_if_any()
 
     while True:
         try:
