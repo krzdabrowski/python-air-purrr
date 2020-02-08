@@ -65,8 +65,15 @@ def save_values_to_json(values):
         json_data['values']['pm10'] = values[0]
         json.dump(json_data, f)
 
+def publish_workstate(workstate):
+    try:
+        mqtt_client.publish("sds011/workstate", str(workstate), retain=True)  # retained = save last known good msg for client before subscription
+    except:
+        print('Error publishing workstate to Mosquitto')
+
 def set_measure_mode():
     sensor.workstate = SDS011.WorkStates.Measuring
+    publish_workstate(sensor.workstate)
     save_workstate_to_json()
 
 def get_values():
@@ -118,6 +125,7 @@ if __name__ == '__main__':
             values = get_values()
             
             sensor.workstate = SDS011.WorkStates.Sleeping
+            publish_workstate(sensor.workstate)
             save_workstate_to_json()
             
             send_values_to_influxdb(values)
@@ -126,6 +134,7 @@ if __name__ == '__main__':
             go_to_sleep()
 
         except KeyboardInterrupt:
+            publish_workstate(sensor.workstate)
             save_workstate_to_json()
             sensor.reset()
             sensor = None
