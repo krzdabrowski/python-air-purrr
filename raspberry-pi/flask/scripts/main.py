@@ -2,12 +2,10 @@
 
 '''
 Copyright 2016, Frank Heuer, Germany
-Reuse 2018, Krzysztof Dabrowski, Poland
-Refactor 2019, Krzysztof Dabrowski, Poland
+Reuse and refactor 2018-2020, Krzysztof Dabrowski, Poland
 
 Main.py is designed to run continuously.
 It includes warm-up mode (at least 30 secs) so it guarantees as correct as possible results.
-Data is published using ThingSpeak platform.
 Big thumbs-up to Frank for his awesome codebase: http://gitlab.com/frankrich/sds011_particle_sensor
 
 This is distributed in the hope that it will be useful,
@@ -21,21 +19,26 @@ import os
 import time
 import json
 import requests
-import paho.mqtt.publish as publish
+import paho.mqtt.client as mqtt
 from sds011 import SDS011
 
 sensor = SDS011('/dev/ttyUSB0')
+mqtt_client = mqtt.Client(client_id="rpi")
 json_data = {}
 
+mqtt_url = 'backend.airpurrr.eu'
 database_url = 'http://backend.airpurrr.eu:8086/write?db=airquality_sds011'
 database_location = '/home/pi/Desktop/db/cached_db.txt'
 json_location = '/var/www/airpurrr.eu/flask/static/data.json'
-api_key_location = '/home/pi/Desktop/db/write_api_key.txt'
 
 def init():
     sensor.reset()
     sensor.dutycycle = 1  # how much minute(s) SDS011 will wait before the measurement (maximum)
     save_values_to_json([0.0, 0.0])
+
+def set_mqtt_client():
+    mqtt_client.connect(mqtt_url)
+    mqtt_client.loop_start()
     
 def send_cached_values_to_influxdb_if_any():
     is_cache_empty = os.stat(database_location).st_size == 0
@@ -91,23 +94,22 @@ def send_values_to_influxdb(values):
         with open(database_location, 'a') as cache:
             cache.write(f'{data_formatted} {time.time_ns()}\n')
 
-def publish_to_thingspeak(payload):
-    print('4. Publishing data to ThingSpeak...')
+def publish_to_mosquitto(payload):
+    print('4. Publishing data to Mosquitto...')
 
-    with open(api_key_location, 'r') as api_key:
-        write_api_key = api_key.read()
     try:
-        publish.single('channels/462987/publish/' + write_api_key, payload, hostname='mqtt.thingspeak.com', transport='websockets', port=80)
+        mqtt_client.publish("sds011/pollution", payload, retain=True)  # retained = save last known good msg for client before subscription
     except:
-        print('Error publishing data to ThingSpeak')
+        print('Error publishing data to Mosquitto')
 
 def go_to_sleep():
-    print('5. Publishing completed. See you in 15 minutes!')
+    print('5. Work is done. See you in 15 minutes!')
     time.sleep(29)  # 30 secs
 
 
 if __name__ == '__main__':
     init()
+    set_mqtt_client()
     send_cached_values_to_influxdb_if_any()
 
     while True:
@@ -119,7 +121,7 @@ if __name__ == '__main__':
             save_workstate_to_json()
             
             send_values_to_influxdb(values)
-            publish_to_thingspeak('field1=' + str(values[1]) + '&field2=' + str(values[0]))
+            publish_to_mosquitto(f'{str(values[1])},{str(values[0])}')
             
             go_to_sleep()
 
@@ -127,4 +129,5 @@ if __name__ == '__main__':
             save_workstate_to_json()
             sensor.reset()
             sensor = None
+            mqtt_client.loop_stop()
             sys.exit('Sensor reset due to a KeyboardInterrupt')
