@@ -9,7 +9,7 @@ from influxdb import DataFrameClient
 from sklearn.linear_model import LinearRegression
 
 mqtt_client = mqtt.Client(client_id="backend")
-
+prediction_hours_ahead = 8
 
 def configure_mqtt_client():
     mqtt_client.connect('localhost')
@@ -38,13 +38,16 @@ def linear_regression(dataframe):
     print(f'Coefficient of determination for PM10: {model_pm10.score(X, Y_pm10)}')
     
     timedelta_next_full_hour = pd.Timedelta(hours=pd.Timestamp.now().hour + 1)
-    timedelta_last_full_hour = timedelta_next_full_hour + pd.Timedelta(hours=8)
+    timedelta_last_full_hour = timedelta_next_full_hour + pd.Timedelta(hours=prediction_hours_ahead)
     timedelta_one_hour_in_nanosecs = pd.Timedelta(hours=1)
 
     X_prediction = np.arange(start=timedelta_next_full_hour.value, stop=timedelta_last_full_hour.value, step=timedelta_one_hour_in_nanosecs.value).reshape(-1, 1)
+    X_prediction_strings = np.empty(prediction_hours_ahead, dtype=object)
     
     for index, prediction_full_hour in enumerate(X_prediction):
         timedelta_full_hour = pd.Timedelta(prediction_full_hour[0])  # numpy array indexing returns 1-element array, hence [0]
+        X_prediction_strings[index] = pd.to_datetime(prediction_full_hour[0]).strftime('%H:%M')
+        
         if timedelta_full_hour >= pd.Timedelta(days=1):  # get values for a new day
             X_prediction[index] = (timedelta_full_hour - pd.Timedelta(days=1)).value
     
@@ -54,19 +57,10 @@ def linear_regression(dataframe):
     print(f'Linear regression prediction for pm25 in % is: {Y_pm25_prediction_perc}')
     print(f'Linear regression prediction for pm10 in % is: {Y_pm10_prediction_perc}')
     
-def publish_values_to_mosquitto():
-    data = [
-    ("16:00", (10.0, 20.0)),
-    ("17:00", (20.0, 40.0)),
-    ("18:00", (30.0, 60.0)),
-    ("19:00", (20.0, 100.0)),
-    ("20:00", (30.0, 50.0)),
-    ("21:00", (40.0, 20.0)),
-    ("22:00", (50.0, 40.0)),
-    ("23:00", (40.0, 80.0))
-    ]
+    return list(zip(X_prediction_strings, zip(Y_pm25_prediction_perc, Y_pm10_prediction_perc)))
     
-    payload = json.dumps(dict(data))
+def publish_values_to_mosquitto(results):
+    payload = json.dumps(dict(results))
 
     try:
         mqtt_client.publish("forecast/linear", payload, retain=True)  # retained = save last known good msg for client before subscription
@@ -77,5 +71,6 @@ def publish_values_to_mosquitto():
 if __name__ == '__main__':
     configure_mqtt_client()
     dataframe = get_dataframe()
-    linear_regression(dataframe)
-    # publish_values_to_mosquitto()
+    
+    results = linear_regression(dataframe)
+    publish_values_to_mosquitto(results)
