@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import paho.mqtt.client as mqtt
 from influxdb import DataFrameClient
 from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
 
 mqtt_client = mqtt.Client(client_id="backend")
 prediction_hours_ahead = 8
@@ -53,6 +54,53 @@ def linear_regression(dataframe):
     
     Y_pm25_prediction_perc = [round(val * 4, 2) for val in model_pm25.predict(X_prediction)]
     Y_pm10_prediction_perc = [round(val * 2, 2) for val in model_pm10.predict(X_prediction)]
+    
+    print(f'Linear regression prediction for pm25 in % is: {Y_pm25_prediction_perc}')
+    print(f'Linear regression prediction for pm10 in % is: {Y_pm10_prediction_perc}')
+    
+    results = dict()
+    results['hours'] = X_prediction_strings.tolist()
+    results['pm25'] = Y_pm25_prediction_perc
+    results['pm10'] = Y_pm10_prediction_perc
+    
+    return results
+    
+def quadratic_regression(dataframe):
+    X = (dataframe['time_of_a_day']) \
+        .values \
+        .astype(np.int64) \
+        .reshape(-1, 1)
+    Y_pm25 = dataframe.pm25.values
+    Y_pm10 = dataframe.pm10.values
+    
+    X_with_X2 = PolynomialFeatures(degree=2, include_bias=False).fit_transform(X)
+    print(X_with_X2)
+    
+    model_pm25 = LinearRegression().fit(X_with_X2, Y_pm25)
+    model_pm10 = LinearRegression().fit(X_with_X2, Y_pm10)
+    
+    print(f'Coefficient of determination for PM25: {model_pm25.score(X_with_X2, Y_pm25)}')
+    print(f'Coefficient of determination for PM10: {model_pm10.score(X_with_X2, Y_pm10)}')
+    
+    timedelta_next_full_hour = pd.Timedelta(hours=pd.Timestamp.now().hour + 1)
+    timedelta_last_full_hour = timedelta_next_full_hour + pd.Timedelta(hours=prediction_hours_ahead)
+    timedelta_one_hour_in_nanosecs = pd.Timedelta(hours=1)
+
+    X_prediction = np.arange(start=timedelta_next_full_hour.value, stop=timedelta_last_full_hour.value, step=timedelta_one_hour_in_nanosecs.value).reshape(-1, 1)
+    X_prediction_X2 = PolynomialFeatures(degree=2, include_bias=False).fit_transform(X_prediction)
+    
+    X_prediction_strings = np.empty(prediction_hours_ahead, dtype=object)
+    
+    for index, prediction_full_hour in enumerate(X_prediction_X2):
+        timedelta_full_hour = pd.Timedelta(prediction_full_hour[0])  # numpy array indexing returns 1-element array, hence [0]
+        X_prediction_strings[index] = pd.to_datetime(prediction_full_hour[0]).strftime('%H:%M')
+        
+        if timedelta_full_hour >= pd.Timedelta(days=1):  # get values for a new day
+            X_prediction_X2[index][0] = (timedelta_full_hour - pd.Timedelta(days=1)).value
+            X_prediction_X2[index][1] = pow(X_prediction_X2[index][0], 2)
+    
+    Y_pm25_prediction_perc = [round(val * 4, 2) for val in model_pm25.predict(X_prediction_X2)]
+    Y_pm10_prediction_perc = [round(val * 2, 2) for val in model_pm10.predict(X_prediction_X2)]
     
     print(f'Linear regression prediction for pm25 in % is: {Y_pm25_prediction_perc}')
     print(f'Linear regression prediction for pm10 in % is: {Y_pm10_prediction_perc}')
