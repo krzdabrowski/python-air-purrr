@@ -57,10 +57,15 @@ def linear_regression(dataframe):
     print(f'Linear regression prediction for pm25 in % is: {Y_pm25_prediction_perc}')
     print(f'Linear regression prediction for pm10 in % is: {Y_pm10_prediction_perc}')
     
-    return list(zip(X_prediction_strings, zip(Y_pm25_prediction_perc, Y_pm10_prediction_perc)))
+    results = dict()
+    results['hours'] = X_prediction_strings.tolist()
+    results['pm25'] = Y_pm25_prediction_perc
+    results['pm10'] = Y_pm10_prediction_perc
+    
+    return results
     
 def publish_values_to_mosquitto(results):
-    payload = json.dumps(dict(results))
+    payload = json.dumps(results)
 
     try:
         mqtt_client.publish("forecast/linear", payload, retain=True)  # retained = save last known good msg for client before subscription
