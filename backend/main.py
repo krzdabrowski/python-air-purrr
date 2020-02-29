@@ -1,6 +1,7 @@
 #!/usr/bin/python3.7
 
 import json
+import pytz
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt  
@@ -45,7 +46,7 @@ def calculate_regression(daily_profile, regressor_for_pm25, regressor_for_pm10):
     print(f'Coefficient of determination for PM25: {model_pm25.score(X, Y_pm25)}')
     print(f'Coefficient of determination for PM10: {model_pm10.score(X, Y_pm10)}')
     
-    timedelta_next_full_hour = pd.Timedelta(hours=pd.Timestamp.now().hour + 1)
+    timedelta_next_full_hour = pd.Timedelta(hours=pd.Timestamp.utcnow().hour + 1)  # times in database in UTC!
     timedelta_last_full_hour = timedelta_next_full_hour + pd.Timedelta(hours=prediction_hours_ahead)
     timedelta_one_hour_in_nanosecs = pd.Timedelta(hours=1)
 
@@ -53,8 +54,13 @@ def calculate_regression(daily_profile, regressor_for_pm25, regressor_for_pm10):
     X_prediction_strings = np.empty(prediction_hours_ahead, dtype=object)
     
     for index, prediction_full_hour in enumerate(X_prediction):
-        timedelta_full_hour = pd.Timedelta(prediction_full_hour[0])  # numpy array indexing returns 1-element array, hence [0]
-        X_prediction_strings[index] = pd.to_datetime(prediction_full_hour[0]).strftime('%H:%M')
+    # numpy array indexing returns 1-element array, hence [0]
+        timedelta_full_hour = pd.Timedelta(prediction_full_hour[0]) + pd.Timedelta(hours=1)  # add +1 hour for Europe/Warsaw
+        X_prediction_strings[index] = pd \
+            .to_datetime(prediction_full_hour[0]) \
+            .replace(tzinfo=pytz.utc) \
+            .astimezone(pytz.timezone('Europe/Warsaw')) \
+            .strftime('%H:%M')
         
         if timedelta_full_hour >= pd.Timedelta(days=1):  # get values for a new day
             X_prediction[index] = (timedelta_full_hour - pd.Timedelta(days=1)).value
@@ -71,6 +77,15 @@ def calculate_regression(daily_profile, regressor_for_pm25, regressor_for_pm10):
     results['pm10'] = Y_pm10_prediction_perc
     
     return results
+    
+def calculcate_neural(dataframe):
+    X = (dataframe.index) \
+        .values \
+        .astype(np.int64) \
+        .reshape(-1, 1)
+    Y_pm25 = dataframe.pm25.values
+    Y_pm10 = dataframe.pm10.values
+    
         
 def publish_values_to_mosquitto(results):
     payload = json.dumps(results)
