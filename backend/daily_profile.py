@@ -6,7 +6,7 @@ import pandas as pd
 
 
 class DailyProfileModel:
-    def __init__(self, regressor_type, forecast_hours_ahead = 8):
+    def __init__(self, regressor_type, forecast_hours_ahead = 6):
         self.regressor_type = regressor_type
         self.forecast_hours_ahead = forecast_hours_ahead
     

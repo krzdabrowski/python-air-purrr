@@ -37,7 +37,7 @@ def publish_values_to_mosquitto(results):
         print('Error publishing data to Mosquitto')
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':    
     configure_mqtt_client()
     dataframe = get_dataframe()
     
@@ -49,37 +49,42 @@ if __name__ == '__main__':
     Y_pm10 = dataframe.pm10.values
     
     
-    print('Linear regression forecast results for PM25:')
-    linear_pm25 = DailyProfileModel(regressor_type=LinearRegression())
-    linear_pm25.calculate_regression(X_daily, Y_pm25)
+    #print('Linear regression forecast results for PM25:')
+    #linear_pm25 = DailyProfileModel(regressor_type=LinearRegression())
+    #linear_pm25.calculate_regression(X_daily, Y_pm25)
     
-    print('\nLinear regression forecast results for PM10:')
-    linear_pm10 = DailyProfileModel(regressor_type=LinearRegression())
-    linear_pm10.calculate_regression(X_daily, Y_pm10)
-    
-    
-    print('\n\nDecision tree regression forecast results for PM25:')
-    decision_tree_pm25 = DailyProfileModel(regressor_type=DecisionTreeRegressor())
-    decision_tree_pm25.calculate_regression(X_daily, Y_pm25)
-    
-    print('\nDecision tree regression forecast results for PM10:')
-    decision_tree_pm10 = DailyProfileModel(regressor_type=DecisionTreeRegressor())
-    decision_tree_pm10.calculate_regression(X_daily, Y_pm10)
+    #print('\nLinear regression forecast results for PM10:')
+    #linear_pm10 = DailyProfileModel(regressor_type=LinearRegression())
+    #linear_pm10.calculate_regression(X_daily, Y_pm10)
     
     
-    print('\n\nRandom forest regression forecast results for PM25:')
-    random_forest_pm25 = DailyProfileModel(regressor_type=RandomForestRegressor())
-    random_forest_pm25.calculate_regression(X_daily, Y_pm25)
+    #print('\n\nDecision tree regression forecast results for PM25:')
+    #decision_tree_pm25 = DailyProfileModel(regressor_type=DecisionTreeRegressor())
+    #decision_tree_pm25.calculate_regression(X_daily, Y_pm25)
+    
+    #print('\nDecision tree regression forecast results for PM10:')
+    #decision_tree_pm10 = DailyProfileModel(regressor_type=DecisionTreeRegressor())
+    #decision_tree_pm10.calculate_regression(X_daily, Y_pm10)
+    
+    
+    #print('\n\nRandom forest regression forecast results for PM25:')
+    #random_forest_pm25 = DailyProfileModel(regressor_type=RandomForestRegressor())
+    #random_forest_pm25.calculate_regression(X_daily, Y_pm25)
         
-    print('\nRandom forest regression forecast results for PM10:')
-    random_forest_pm10 = DailyProfileModel(regressor_type=RandomForestRegressor())
-    random_forest_pm10.calculate_regression(X_daily, Y_pm10)
+    #print('\nRandom forest regression forecast results for PM10:')
+    #random_forest_pm10 = DailyProfileModel(regressor_type=RandomForestRegressor())
+    #random_forest_pm10.calculate_regression(X_daily, Y_pm10)
     
     
-    print('\n\nNeural network regression forecast results for PM25:')
-    neural_network_pm25 = NeuralNetworkModel(n_lag=60, n_seq=6, n_epochs=1, n_neurons=1)
+    #print('\n\nNeural network regression forecast results for PM25:')
+    #neural_network_pm25 = NeuralNetworkModel(n_epochs=5, n_neurons=1)
+    #neural_network_pm25.calculate_regression(Y_pm25)
+    
+    print('\nNeural network regression forecast results for PM25:')
+    neural_network_pm25 = NeuralNetworkModel(n_lag=1440, n_epochs=5, n_neurons=10) # hidden neurony miedzy 5 a 12 zalecane?
     neural_network_pm25.calculate_regression(Y_pm25)
     
-    print('\nNeural network regression forecast results for PM10:')
-    neural_network_pm10 = NeuralNetworkModel(n_lag=60, n_seq=6, n_epochs=1, n_neurons=1)
-    neural_network_pm10.calculate_regression(Y_pm10)
+    #print('\nNeural network regression forecast results for PM10:')
+    #neural_network_pm10 = NeuralNetworkModel(n_lag=1, n_epochs=1, n_neurons=1)
+    #neural_network_pm10.n_seq = neural_network_pm10.get_minutes_of_forecasts_from_now()[-1]
+    #neural_network_pm10.calculate_regression(Y_pm10)

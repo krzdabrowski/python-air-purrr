@@ -4,17 +4,34 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from keras.models import Sequential
+from keras.models import load_model
+from keras.layers import Dropout
 from keras.layers import Dense
 from keras.layers import LSTM
 
 
 class NeuralNetworkModel:
-    def __init__(self, n_lag, n_seq, n_epochs, n_neurons, forecast_hours_ahead = 8):
-        self.n_lag = n_lag  # ile minut wstecz bierze pod uwage - w teorii nie powinien chyba wiecej niz max czas do kolejnej predykcji? + najwazniejsza do detekcji czy jest dobre powietrze czy zle = to co bedzie w kolejnej rownej godzinie
-        self.n_seq = n_seq  # ile minut predykcja do przodu
+    def __init__(self, n_lag, n_epochs, n_neurons, forecast_hours_ahead = 6):
+        self.forecast_hours_ahead = forecast_hours_ahead
+    
+        self.n_lag = n_lag  # ile minut wstecz bierze pod uwage - w teorii nie powinien chyba wiecej niz max czas do kolejnej predykcji? + najwazniejsza do detekcji czy jest dobre powietrze czy zle = to co bedzie w kolejnej rownej godzinie = INPUT NEURONS (?)
+        self.n_seq = forecast_hours_ahead * 60  # ile minut predykcja do przodu (max 6h, realnie miedzy 5 a 6h) = OUTPUT NEURONS
         self.n_epochs = n_epochs  # ile epok 
         self.n_neurons = n_neurons  # ile neuronow
-        self.forecast_hours_ahead = forecast_hours_ahead
+
+
+    def get_minutes_of_forecasts_from_now(self):
+        timedelta_now = pd.Timedelta(hours=pd.Timestamp.now().hour, minutes=pd.Timestamp.now().minute)
+        timedelta_next_full_hour = pd.Timedelta(hours=pd.Timestamp.now().hour + 1)
+        next_full_hour_in_minutes_from_now = (timedelta_next_full_hour - timedelta_now).seconds // 60  # 60 seconds in minute
+        last_full_hour_in_minutes_from_now = (timedelta_next_full_hour - timedelta_now + pd.Timedelta(hours=self.forecast_hours_ahead)).seconds // 60
+        
+        return np.arange(
+            start=next_full_hour_in_minutes_from_now,
+            stop=last_full_hour_in_minutes_from_now,
+            step=60
+        )  # 60 minutes in hour  
+
     
     # create a differenced series
     def difference(self, dataset, interval=1):
@@ -64,18 +81,23 @@ class NeuralNetworkModel:
         # transform into supervised learning problem X, y
         supervised = self.timeseries_to_supervised(scaled_values, self.n_lag, self.n_seq)
         supervised_values = supervised.values
+        
+        # split into train and test sets
+        # train, test = supervised_values[0:-10000], supervised_values[-10000:]  # na ilu sotatnich probkach robi predykcje (test)
     
         self.fit_lstm(supervised_values)
+        # self.load_model_and_predict(supervised_values)
      
     # fit an LSTM network to training data
-    def fit_lstm(self, data):
+    def fit_lstm(self, train):
         # reshape training into [samples, timesteps, features]
-        X, y = data[:, 0:self.n_lag], data[:, self.n_lag:]
+        X, y = train[:, 0:self.n_lag], train[:, self.n_lag:]
         X = X.reshape(X.shape[0], 1, X.shape[1])
         
         # design network
         model = Sequential()
         model.add(LSTM(self.n_neurons, batch_input_shape=(1, X.shape[1], X.shape[2]), stateful=True))
+        model.add(Dropout(0.2))
         model.add(Dense(y.shape[1]))
         model.compile(loss='mean_squared_error', optimizer='adam')
         
@@ -84,12 +106,21 @@ class NeuralNetworkModel:
             model.fit(X, y, epochs=1, batch_size=1, shuffle=False)
             model.reset_states()
             
-        self.make_forecast(model, data)
+        # self.make_forecast(model, train)
+        model.save("model.h5")
+        print("Model saved")
+
+
+    def load_model_and_predict(self, train):
+        # load model
+        model = load_model('model.h5')
+        
+        self.make_forecast(model, train)
+
 
     # forecast with LSTM
-    def make_forecast(self, model, data):
-        forecasts = list()
-        X, y = data[0, 0:self.n_lag], data[0, self.n_lag:]
+    def make_forecast(self, model, test):
+        X, y = test[0, 0:self.n_lag], test[0, self.n_lag:]
         
         # reshape input pattern to [samples, timesteps, features]
         X = X.reshape(1, 1, len(X))
@@ -105,24 +136,36 @@ class NeuralNetworkModel:
         
     # inverse data transform on forecasts
     def inverse_transform(self, forecasts):
-        inverted = list()
+        # inverted = list()
         
-        for i in range(len(forecasts)):
-            # create array from forecast
-            forecast = np.array(forecasts[i])
-            forecast = forecast.reshape(1, -1)
+        # create array from forecast
+        forecast = np.array(forecasts).reshape(1, -1)
             
-            # invert scaling
-            inv_scale = self.scaler.inverse_transform(forecast)
-            inv_scale = inv_scale[0, :]
+        # invert scaling
+        inv_scale = self.scaler.inverse_transform(forecast)
+        inv_scale = inv_scale[0, :]
             
-            # invert differencing
-            index = len(self.raw_values) - self.n_seq + i - 1
-            last_ob = self.raw_values[index]
-            inv_diff = list()
-            inv_diff.append(inv_scale[0] + last_ob)
-            
-            # store
-            inverted.append(inv_diff)
+        # invert differencing
+        index = len(self.raw_values) - 1
+        last_ob = self.raw_values[index]
+        inverted = self.inverse_difference(last_ob, inv_scale)
+    
+        # store
+        # inverted.append(inv_diff)
             
         print(f'Predicted: {inverted}') 
+        
+        predictions_each_hour = [inverted[i-1] for i in self.minutes_of_forecasts_array]
+        print(predictions_each_hour)
+        
+    # invert differenced forecast
+    def inverse_difference(self, last_ob, forecast):
+        # invert first forecast
+        inverted = list()
+        inverted.append(forecast[0] + last_ob)
+
+        # propagate difference forecast using inverted first value
+        for i in range(1, len(forecast)):
+            inverted.append(forecast[i] + inverted[i-1])
+        
+        return inverted
