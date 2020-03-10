@@ -13,6 +13,7 @@ from keras.layers import LSTM
 class NeuralNetworkModel:
     def __init__(self, n_lag, n_epochs, n_neurons, forecast_hours_ahead = 6):
         self.forecast_hours_ahead = forecast_hours_ahead
+        self.minutes_of_forecasts_array = self.get_minutes_of_forecasts_from_now()
     
         self.n_lag = n_lag  # ile minut wstecz bierze pod uwage - w teorii nie powinien chyba wiecej niz max czas do kolejnej predykcji? + najwazniejsza do detekcji czy jest dobre powietrze czy zle = to co bedzie w kolejnej rownej godzinie = INPUT NEURONS (?)
         self.n_seq = forecast_hours_ahead * 60  # ile minut predykcja do przodu (max 6h, realnie miedzy 5 a 6h) = OUTPUT NEURONS
@@ -83,10 +84,10 @@ class NeuralNetworkModel:
         supervised_values = supervised.values
         
         # split into train and test sets
-        # train, test = supervised_values[0:-10000], supervised_values[-10000:]  # na ilu sotatnich probkach robi predykcje (test)
+        train, test = supervised_values[0:-1440], supervised_values[-1440:]  # na ilu sotatnich probkach robi predykcje (test)
     
-        self.fit_lstm(supervised_values)
-        # self.load_model_and_predict(supervised_values)
+        # self.fit_lstm(supervised_values)
+        self.load_model_and_predict(test)
      
     # fit an LSTM network to training data
     def fit_lstm(self, train):
@@ -107,15 +108,15 @@ class NeuralNetworkModel:
             model.reset_states()
             
         # self.make_forecast(model, train)
-        model.save("model.h5")
+        model.save("model_47k.h5")
         print("Model saved")
 
 
-    def load_model_and_predict(self, train):
+    def load_model_and_predict(self, test):
         # load model
-        model = load_model('model.h5')
+        model = load_model('model_47k.h5')
         
-        self.make_forecast(model, train)
+        self.make_forecast(model, test)
 
 
     # forecast with LSTM
