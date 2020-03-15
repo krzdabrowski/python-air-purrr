@@ -2,6 +2,7 @@
 
 import numpy as np
 import pandas as pd
+
 from sklearn.preprocessing import MinMaxScaler
 from keras.models import Sequential
 from keras.models import load_model
@@ -9,11 +10,15 @@ from keras.layers import Dropout
 from keras.layers import Dense
 from keras.layers import LSTM
 
+from utils import get_input_forecast_formatted_array 
+
 
 class NeuralNetworkModel:
-    def __init__(self, n_lag, n_epochs, n_neurons, forecast_hours_ahead = 6):
+    def __init__(self, isPm25, n_lag, n_epochs, n_neurons, forecast_hours_ahead = 6):
+        self.isPm25 = isPm25
         self.forecast_hours_ahead = forecast_hours_ahead
         self.minutes_of_forecasts_array = self.get_minutes_of_forecasts_from_now()
+        _, self.hours = get_input_forecast_formatted_array(forecast_hours_ahead)
     
         self.n_lag = n_lag  # ile minut wstecz bierze pod uwage - w teorii nie powinien chyba wiecej niz max czas do kolejnej predykcji? + najwazniejsza do detekcji czy jest dobre powietrze czy zle = to co bedzie w kolejnej rownej godzinie = INPUT NEURONS (?)
         self.n_seq = forecast_hours_ahead * 60  # ile minut predykcja do przodu (max 6h, realnie miedzy 5 a 6h) = OUTPUT NEURONS
@@ -84,12 +89,19 @@ class NeuralNetworkModel:
         supervised_values = supervised.values
         
         # split into train and test sets
-        train, test = supervised_values[0:-1440], supervised_values[-1440:]  # na ilu sotatnich probkach robi predykcje (test)
+        train, test = supervised_values[0:-1440], supervised_values[-1440:]  # last 1440 samples (1 day) to make a prediction (test)
     
-        # self.fit_lstm(supervised_values)
-        self.load_model_and_predict(test)
+        ### self.fit_lstm(supervised_values) ###
+        
+        # load model
+        if self.isPm25:
+            model = load_model('pm25_model_45k_500_epochs.h5')
+        else:
+            model = load_model('pm10_model_47k_500_epochs.h5')
+        
+        self.make_forecast(model, test)
      
-    # fit an LSTM network to training data
+    ### fit an LSTM network to training data ###
     def fit_lstm(self, train):
         # reshape training into [samples, timesteps, features]
         X, y = train[:, 0:self.n_lag], train[:, self.n_lag:]
@@ -101,22 +113,15 @@ class NeuralNetworkModel:
         model.add(Dropout(0.2))
         model.add(Dense(y.shape[1]))
         model.compile(loss='mean_squared_error', optimizer='adam')
-        
+                
         # fit network
         for i in range(self.n_epochs):
             model.fit(X, y, epochs=1, batch_size=1, shuffle=False)
             model.reset_states()
             
-        # self.make_forecast(model, train)
-        model.save("model_47k.h5")
-        print("Model saved")
-
-
-    def load_model_and_predict(self, test):
-        # load model
-        model = load_model('model_47k.h5')
-        
-        self.make_forecast(model, test)
+        ### self.make_forecast(model, train) ###
+        ### model.save("pm10_model_47k_500_epochs.h5") ###
+        ### print("Model saved") ###
 
 
     # forecast with LSTM
@@ -137,8 +142,6 @@ class NeuralNetworkModel:
         
     # inverse data transform on forecasts
     def inverse_transform(self, forecasts):
-        # inverted = list()
-        
         # create array from forecast
         forecast = np.array(forecasts).reshape(1, -1)
             
@@ -150,14 +153,9 @@ class NeuralNetworkModel:
         index = len(self.raw_values) - 1
         last_ob = self.raw_values[index]
         inverted = self.inverse_difference(last_ob, inv_scale)
-    
-        # store
-        # inverted.append(inv_diff)
             
-        print(f'Predicted: {inverted}') 
-        
-        predictions_each_hour = [inverted[i-1] for i in self.minutes_of_forecasts_array]
-        print(predictions_each_hour)
+        self.forecast = [inverted[i-1] for i in self.minutes_of_forecasts_array]
+        print(f'Forecast is: {self.forecast}')
         
     # invert differenced forecast
     def inverse_difference(self, last_ob, forecast):
