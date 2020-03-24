@@ -26,7 +26,8 @@ mqtt_client = mqtt.Client(client_id="rpi")
 
 mqtt_url = 'backend.airpurrr.eu'
 database_url = 'http://backend.airpurrr.eu:8086/write?db=airquality_sds011'
-database_location = '/home/pi/Desktop/db/cached_db.txt'
+cache_location = '/home/pi/Desktop/db/cached_db.txt'
+local_database_location = '/home/pi/git-backend-air-purrr/backend-air-purrr/raspberry-pi/flask/local_db.csv'
 
 
 def init():
@@ -34,19 +35,22 @@ def init():
     sensor.dutycycle = 1  # how much minute(s) SDS011 will wait before the measurement (maximum)
 
 def configure_mqtt_client():
-    mqtt_client.connect(mqtt_url)
-    mqtt_client.loop_start()
+    try:
+        mqtt_client.connect(mqtt_url)
+        mqtt_client.loop_start()
+    except:
+        print('Error connecting to Mosquitto')
     
 def send_cached_values_to_influxdb_if_any():
-    is_cache_empty = os.stat(database_location).st_size == 0
+    is_cache_empty = os.stat(cache_location).st_size == 0
     
     if not is_cache_empty:
         try:
             print('Sending cache to InfluxDB...')
-            with open(database_location, 'r') as cache:
+            with open(cache_location, 'r') as cache:
                 requests.post(url=database_url, data=cache.read())
             print('Send completed, CLEANING CACHE!!!')
-            with open(database_location, 'w'): pass
+            with open(cache_location, 'w'): pass
         except:
             print('Error sending CACHE to InfluxDB!')
 
@@ -70,15 +74,19 @@ def get_values():
             return values
 
 def send_values_to_influxdb(values):
-    print('3. Read completed. Sending values to database...')
+    print('3. Read completed. Saving to local csv file and and sending to InfluxDB...')
     data_formatted = f'indoors_pollution pm25={values[1]},pm10={values[0]}'
-
+    current_time_in_ns = time.time_ns()
+    
+    with open(local_database_location, 'a') as local_db:
+        local_db.write(f'{data_formatted} {current_time_in_ns}\n')
+    
     try:
         requests.post(url=database_url, data=data_formatted)
     except:
         print('Error sending data to InfluxDB, appending to cache...')
-        with open(database_location, 'a') as cache:
-            cache.write(f'{data_formatted} {time.time_ns()}\n')
+        with open(cache_location, 'a') as cache:
+            cache.write(f'{data_formatted} {current_time_in_ns}\n')
 
 def publish_values_to_mosquitto(payload):
     print('4. Publishing data to Mosquitto...')
@@ -89,7 +97,7 @@ def publish_values_to_mosquitto(payload):
         print('Error publishing data to Mosquitto')
 
 def go_to_sleep():
-    print('5. Work is done. See you in 15 minutes!')
+    print('5. Work is done. See you in 30 seconds!')
     time.sleep(29)  # 30 secs
 
 
