@@ -1,0 +1,73 @@
+LINKI:
+https://machinelearningmastery.com/how-to-develop-lstm-models-for-multi-step-time-series-forecasting-of-household-power-consumption/
+https://machinelearningmastery.com/how-to-develop-lstm-models-for-time-series-forecasting/
+
+
+LSTM
+
+# define dataset
+X = array([[10, 20, 30], [20, 30, 40], [30, 40, 50], [40, 50, 60]])
+y = array([40, 50, 60, 70])
+
+# reshape from [samples, timesteps] into [samples, timesteps, features]
+X = X.reshape((X.shape[0], X.shape[1], 1))
+
+# define model
+model = Sequential()
+model.add(LSTM(50, activation='relu', input_shape=(3, 1)))
+model.add(Dense(1))
+model.compile(optimizer='adam', loss='mse')
+
+# fit model
+model.fit(X, y, epochs=1000, verbose=0)
+
+# demonstrate prediction
+x_input = array([50, 60, 70])
+x_input = x_input.reshape((1, 3, 1))
+yhat = model.predict(x_input, verbose=0)
+print(yhat)
+
+
+
+Given [50, 60, 70] as input, the model correctly predicts 80 as the next value in the sequence.
+
+
+
+
+##########################################################################3
+
+
+
+
+
+Encoder-Decoder LSTM
+
+# define dataset
+X = array([[10, 20, 30], [20, 30, 40], [30, 40, 50], [40, 50, 60]])
+y = array([[40,50],[50,60],[60,70],[70,80]])
+
+# reshape from [samples, timesteps] into [samples, timesteps, features]
+X = X.reshape((X.shape[0], X.shape[1], 1))
+y = y.reshape((y.shape[0], y.shape[1], 1))
+
+# define model
+#We will define an LSTM encoder to read and encode the input sequences of 3 time steps. The encoded sequence will be repeated 2 times by the model for the two output time steps required by the model using a RepeatVector layer. These will be fed to a decoder LSTM layer before using a Dense output layer wrapped in a TimeDistributed layer that will produce one output for each step in the output sequence.
+model = Sequential()
+model.add(LSTM(100, activation='relu', input_shape=(3, 1)))
+model.add(RepeatVector(2))
+model.add(LSTM(100, activation='relu', return_sequences=True))
+model.add(TimeDistributed(Dense(1)))
+model.compile(optimizer='adam', loss='mse')
+
+# fit model
+model.fit(X, y, epochs=100, verbose=0)
+
+# demonstrate prediction
+x_input = array([50, 60, 70])
+x_input = x_input.reshape((1, 3, 1))
+yhat = model.predict(x_input, verbose=0)
+print(yhat)
+
+
+
+Given [50, 60, 70] as input, the model correctly predicts [80, 90] as the next two values in the sequence.
