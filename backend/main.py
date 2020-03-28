@@ -9,6 +9,7 @@ from influxdb import DataFrameClient
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
+from xgboost import XGBRegressor
 
 from daily_profile import DailyProfileModel
 from neural import NeuralNetworkModel
@@ -16,7 +17,7 @@ from utils import pm25_to_percentage, pm10_to_percentage
 
 
 mqtt_client = mqtt.Client(client_id='backend')
-forecast_topics = ['forecast/linear', 'forecast/nonlinear', 'forecast/neuralnetwork', 'forecast/xgboost']
+forecast_topics = ['forecast/linear', 'forecast/nonlinear', 'forecast/xgboost', 'forecast/neuralnetwork']
 
 
 def configure_mqtt_client():
@@ -87,6 +88,24 @@ def nonlinear_regression(X_daily, Y_pm25, Y_pm10):
         publish_values_to_mosquitto(results, forecast_topics[1])
 
 
+def xgboost_regression(X_daily, Y_pm25, Y_pm10):
+    results = dict()
+    print('\n\nXGBoost regression forecast results for PM25:')
+    xgboost_pm25 = DailyProfileModel(regressor_type=XGBRegressor())
+    xgboost_pm25.calculate_regression(X_daily, Y_pm25)
+    
+    print('\nXGBoost regression forecast results for PM10:')
+    xgboost_pm10 = DailyProfileModel(regressor_type=XGBRegressor())
+    xgboost_pm10.calculate_regression(X_daily, Y_pm10)
+    
+    if xgboost_pm25.hours == xgboost_pm10.hours:
+        results['hours'] = xgboost_pm25.hours
+        results['pm25'] = pm25_to_percentage(xgboost_pm25.forecast)
+        results['pm10'] = pm10_to_percentage(xgboost_pm10.forecast)
+        
+        publish_values_to_mosquitto(results, forecast_topics[2])
+
+
 def neural_network_regression(Y_pm25, Y_pm10):
     results = dict()
     print('\n\nNeural network regression forecast results for PM25:')
@@ -102,7 +121,7 @@ def neural_network_regression(Y_pm25, Y_pm10):
         results['pm25'] = pm25_to_percentage(neural_network_pm25.forecast)
         results['pm10'] = pm10_to_percentage(neural_network_pm10.forecast)
         
-        publish_values_to_mosquitto(results, forecast_topics[2])
+        publish_values_to_mosquitto(results, forecast_topics[3])
 
 
 if __name__ == '__main__':    
@@ -118,4 +137,5 @@ if __name__ == '__main__':
     
     linear_regression(X_daily, Y_pm25, Y_pm10)
     nonlinear_regression(X_daily, Y_pm25, Y_pm10)
+    xgboost_regression(X_daily, Y_pm25, Y_pm10)
     neural_network_regression(Y_pm25, Y_pm10)
