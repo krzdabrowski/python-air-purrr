@@ -13,7 +13,7 @@ from xgboost import XGBRegressor
 
 from daily_profile import DailyProfileModel
 from neural import NeuralNetworkModel
-from utils import pm25_to_percentage, pm10_to_percentage
+from utils import hyper_tuning, pm25_to_percentage, pm10_to_percentage
 
 
 mqtt_client = mqtt.Client(client_id='backend')
@@ -61,6 +61,31 @@ def linear_regression(X_daily, Y_pm25, Y_pm10):
         publish_values_to_mosquitto(results, forecast_topics[0])
        
  
+def nonlinear_hyperparameters_tuning(X_daily, Y_pm25, Y_pm10):
+    hyperparameters_decision_tree = {
+        'max_features': ['sqrt', 'log2', None],
+        'max_depth': [2, 4, 6, 8]
+    }
+    
+    hyperparameters_random_forest = {
+        'max_features': ['sqrt', 'log2', None],
+        'n_estimators': [50, 100, 150, 200, 250],
+        'max_depth': [2, 4, 6, 8]
+    }
+
+    print('\nDecision tree hyperparameters tuning results for PM25:')
+    hyper_tuning(DecisionTreeRegressor(), hyperparameters_decision_tree, X_daily, Y_pm25)
+    
+    print('\nDecision tree hyperparameters tuning results for PM10:')
+    hyper_tuning(DecisionTreeRegressor(), hyperparameters_decision_tree, X_daily, Y_pm10)
+    
+    print('\n\nRandom forest hyperparameters tuning results for PM25:')
+    hyper_tuning(RandomForestRegressor(), hyperparameters_random_forest, X_daily, Y_pm25)
+    
+    print('\nRandom forest hyperparameters tuning results for PM10:')
+    hyper_tuning(RandomForestRegressor(), hyperparameters_random_forest, X_daily, Y_pm10)
+ 
+ 
 def nonlinear_regression(X_daily, Y_pm25, Y_pm10):
     results = dict()
     print('\n\nDecision tree regression forecast results for PM25:')
@@ -86,6 +111,20 @@ def nonlinear_regression(X_daily, Y_pm25, Y_pm10):
         results['pm10'] = pm10_to_percentage(random_forest_pm10.forecast)
         
         publish_values_to_mosquitto(results, forecast_topics[1])
+
+
+def xgboost_hyperparameters_tuning(X_daily, Y_pm25, Y_pm10):
+    hyperparameters_xgboost = {
+        'learning_rate': [0.0001, 0.001, 0.01, 0.1],
+        'n_estimators': [50, 100, 200, 500, 1000],
+        'max_depth': [2, 4, 6, 8]
+    }
+
+    print('\n\nXGBoost hyperparameters tuning results for PM25:')
+    hyper_tuning(XGBRegressor(), hyperparameters_xgboost, X_daily, Y_pm25)
+    
+    print('\nXGBoost hyperparameters tuning results for PM10:')
+    hyper_tuning(XGBRegressor(), hyperparameters_xgboost, X_daily, Y_pm10)
 
 
 def xgboost_regression(X_daily, Y_pm25, Y_pm10):
@@ -134,6 +173,13 @@ if __name__ == '__main__':
         .reshape(-1, 1)
     Y_pm25 = dataframe.pm25.values
     Y_pm10 = dataframe.pm10.values
+    
+    # print('##### HYPERPARAMETERS TUNING #####')
+    
+    # nonlinear_hyperparameters_tuning(X_daily, Y_pm25, Y_pm10)
+    # xgboost_hyperparameters_tuning(X_daily, Y_pm25, Y_pm10)
+
+    print('\n\n##### CALCULATING PREDICTIONS #####')
     
     linear_regression(X_daily, Y_pm25, Y_pm10)
     nonlinear_regression(X_daily, Y_pm25, Y_pm10)
