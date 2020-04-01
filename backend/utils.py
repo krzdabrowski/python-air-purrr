@@ -3,6 +3,22 @@
 import pytz
 import numpy as np
 import pandas as pd
+from sklearn.model_selection import GridSearchCV
+
+
+def hyper_tuning(model, hyperparameters, X_daily, Y_daily):
+    # grid search
+    grid_search = GridSearchCV(model, hyperparameters, scoring="neg_mean_squared_error", n_jobs=-1, cv=5)
+    grid_result = grid_search.fit(X_daily, Y_daily)
+
+    # summarize results
+    print(f'Best hyperparameters: {grid_result.best_score_} using {grid_result.best_params_}')
+    
+    means = grid_result.cv_results_['mean_test_score']
+    stds = grid_result.cv_results_['std_test_score']
+    params = grid_result.cv_results_['params']
+    for mean, stdev, param in zip(means, stds, params):
+        print(f'{mean} ({stdev}) with: {param}')
 
 
 def get_input_forecast_array(forecast_hours_ahead):
