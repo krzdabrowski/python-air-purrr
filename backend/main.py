@@ -147,20 +147,20 @@ def xgboost_regression(X_daily, Y_pm25, Y_pm10):
 
 def neural_network_regression(Y_pm25, Y_pm10):
     results = dict()
-    print('\n\nNeural network regression forecast results for PM25:')
-    neural_network_pm25 = NeuralNetworkModel(isPm25=True, n_lag=1440, n_epochs=500, n_neurons=10) # hidden neurony miedzy 5 a 12 zalecane?
-    neural_network_pm25.calculate_regression(Y_pm25)
+    # print('\n\nNeural network regression forecast results for PM25:')
+    # neural_network_pm25 = NeuralNetworkModel(isPm25=True, n_lag=1440, n_epochs=500, n_neurons=10) # hidden neurony miedzy 5 a 12 zalecane?
+    # neural_network_pm25.calculate_regression(Y_pm25)
     
     print('\nNeural network regression forecast results for PM10:')
     neural_network_pm10 = NeuralNetworkModel(isPm25=False, n_lag=1440, n_epochs=500, n_neurons=10)
     neural_network_pm10.calculate_regression(Y_pm10)
     
-    if neural_network_pm25.hours == neural_network_pm10.hours:
-        results['hours'] = neural_network_pm25.hours
-        results['pm25'] = pm25_to_percentage(neural_network_pm25.forecast)
-        results['pm10'] = pm10_to_percentage(neural_network_pm10.forecast)
+    # if neural_network_pm25.hours == neural_network_pm10.hours:
+    #     results['hours'] = neural_network_pm25.hours
+    #     results['pm25'] = pm25_to_percentage(neural_network_pm25.forecast)
+    #     results['pm10'] = pm10_to_percentage(neural_network_pm10.forecast)
         
-        publish_values_to_mosquitto(results, forecast_topics[3])
+    #     publish_values_to_mosquitto(results, forecast_topics[3])
 
 
 if __name__ == '__main__':    
@@ -181,7 +181,7 @@ if __name__ == '__main__':
 
     print('\n\n##### CALCULATING PREDICTIONS #####')
     
-    linear_regression(X_daily, Y_pm25, Y_pm10)
-    nonlinear_regression(X_daily, Y_pm25, Y_pm10)
-    xgboost_regression(X_daily, Y_pm25, Y_pm10)
+    # linear_regression(X_daily, Y_pm25, Y_pm10)
+    # nonlinear_regression(X_daily, Y_pm25, Y_pm10)
+    # xgboost_regression(X_daily, Y_pm25, Y_pm10)
     neural_network_regression(Y_pm25, Y_pm10)
