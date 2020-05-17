@@ -19,6 +19,7 @@ import os
 import time
 import requests
 import paho.mqtt.client as mqtt
+import control_purifier
 from sds011 import SDS011
 
 sensor = SDS011('/dev/ttyUSB0')
@@ -36,12 +37,39 @@ def init():
 
 def configure_mqtt_client():
     try:
+        mqtt_client.on_connect = on_subscribe_fan_changes
+        mqtt_client.on_message = on_fan_changes_received
         mqtt_client.connect(mqtt_url)
         mqtt_client.loop_start()
     except:
         print('Error connecting to Mosquitto')
+        
+def on_subscribe_fan_changes(client, userdata, flags, rc):
+    try:
+        client.subscribe('airpurifier/fan/state')
+        client.subscribe('airpurifier/fan/speed')
+    except:
+        print('Error subscribing fan channels to Mosquitto')
+
+def on_fan_changes_received(client, userdata, msg):
+    if msg.topic == 'airpurifier/fan/state':
+        if msg.payload == 'on':
+            control_purifier.turn_on()
+        elif msg.payload == 'off':
+            control_purifier.turn_off()
+        else:
+            print('Incorrent message payload for fan state')
+    elif msg.topic == 'airpurifier/fan/speed':
+        if msg.payload == 'high':
+            control_purifier.high_mode()
+        elif msg.payload == 'low':
+            control_purifier.low_mode()
+        else:
+            print('Incorrent message payload for fan speed')
+    else:
+        print('Incorrect message topic')
     
-def send_cached_values_to_influxdb_if_any():
+def send_cached_sensor_airpollution_to_influxdb_if_any():
     is_cache_empty = os.stat(cache_location).st_size == 0
     
     if not is_cache_empty:
@@ -54,13 +82,13 @@ def send_cached_values_to_influxdb_if_any():
         except:
             print('Error sending CACHE to InfluxDB!')
 
-def publish_workstate_to_mosquitto(workstate):
+def publish_sensor_workstate(workstate):
     try:
-        mqtt_client.publish("sds011/workstate", str(workstate), retain=True)  # retained = save last known good msg for client before subscription
+        mqtt_client.publish("airpurifier/sensor/state", str(workstate), retain=True)  # retained = save last known good msg for client before subscription
     except:
         print('Error publishing workstate to Mosquitto')
 
-def get_values():
+def get_sensor_airpollution_values():
     print(f'\n1. Trying to get some values:')
     measure_time_start = time.time()
             
@@ -73,7 +101,7 @@ def get_values():
             print(f'2. {time.time() - measure_time_start:.0f} seconds elapsed, values measured:    PM2.5   {values[1]}µg/m³, PM10    {values[0]}µg/m³')
             return values
 
-def send_values_to_influxdb(values):
+def send_sensor_airpollution_to_influxdb(values):
     print('3. Read completed. Saving to local csv file and and sending to InfluxDB...')
     data_formatted = f'indoors_pollution pm25={values[1]},pm10={values[0]}'
     current_time_in_ns = time.time_ns()
@@ -88,41 +116,41 @@ def send_values_to_influxdb(values):
         with open(cache_location, 'a') as cache:
             cache.write(f'{data_formatted} {current_time_in_ns}\n')
 
-def publish_values_to_mosquitto(payload):
-    print('4. Publishing data to Mosquitto...')
+def publish_sensor_airpollution(payload):
+    print('4. Publishing air pollution to Mosquitto...')
 
     try:
-        mqtt_client.publish("sds011/pollution", payload, retain=True)  # retained = save last known good msg for client before subscription
+        mqtt_client.publish("airpurifier/sensor/pollution", payload, retain=True)  # retained = save last known good msg for client before subscription
     except:
         print('Error publishing data to Mosquitto')
 
 def go_to_sleep():
     print('5. Work is done. See you in 30 seconds!')
-    time.sleep(29)  # 30 secs
+    time.sleep(900)  # 30 secs  BYLO 29
 
 
 if __name__ == '__main__':
     init()
     configure_mqtt_client()
-    send_cached_values_to_influxdb_if_any()
+    # send_cached_sensor_airpollution_to_influxdb_if_any()
 
     while True:
         try:
             # measuring
             sensor.workstate = SDS011.WorkStates.Measuring
-            publish_workstate_to_mosquitto(sensor.workstate)
-            values = get_values()
+            publish_sensor_workstate(sensor.workstate)
+            airpollution_values = get_sensor_airpollution_values()
             
             # sending data
             sensor.workstate = SDS011.WorkStates.Sleeping
-            publish_workstate_to_mosquitto(sensor.workstate)
-            send_values_to_influxdb(values)
-            publish_values_to_mosquitto(f'{str(values[1])},{str(values[0])}')
+            publish_sensor_workstate(sensor.workstate)
+            # send_sensor_airpollution_to_influxdb(airpollution_values)
+            publish_sensor_airpollution(f'{str(airpollution_values[1])},{str(airpollution_values[0])}')
             
             go_to_sleep()
 
         except KeyboardInterrupt:
-            publish_workstate_to_mosquitto(sensor.workstate)
+            publish_sensor_workstate(sensor.workstate)
             sensor.reset()
             sensor = None
             mqtt_client.loop_stop()
