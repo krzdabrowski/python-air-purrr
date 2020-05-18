@@ -1,9 +1,8 @@
 #!/usr/bin/python3.7
 
-import json
 import numpy as np
 import pandas as pd
-import paho.mqtt.client as mqtt
+import paho.mqtt.client
 
 from influxdb import DataFrameClient
 from sklearn.linear_model import LinearRegression
@@ -13,17 +12,13 @@ from xgboost import XGBRegressor
 
 from daily_profile import DailyProfileModel
 from neural import NeuralNetworkModel
-from utils import hyper_tuning, pm25_to_percentage, pm10_to_percentage
+from utils import pm25_to_percentage, pm10_to_percentage
+from mqtt import configure_mqtt_client, publish_forecast_values
+from hypertuning import nonlinear_hyperparameters_tuning, xgboost_hyperparameters_tuning
 
 
-mqtt_client = mqtt.Client(client_id='backend')
+mqtt_client = paho.mqtt.client.Client(client_id='backend')
 forecast_topics = ['forecast/linear', 'forecast/nonlinear', 'forecast/xgboost', 'forecast/neuralnetwork']
-
-
-def configure_mqtt_client():
-    mqtt_client.connect('localhost')
-    mqtt_client.loop_start()
-    
 
 def get_dataframe():
     client = DataFrameClient(database='airquality_sds011')
@@ -33,16 +28,6 @@ def get_dataframe():
     
     return dataframe
     
-
-def publish_values_to_mosquitto(results, topic):
-    payload = json.dumps(results)
-    
-    try:
-        mqtt_client.publish(topic, payload, retain=True)  # retained = save last known good msg for client before subscription
-    except:
-        print('Error publishing data to Mosquitto')
-     
-   
 def linear_regression(X_daily, Y_pm25, Y_pm10):
     results = dict()
     print('Linear regression forecast results for PM25:')
@@ -58,34 +43,8 @@ def linear_regression(X_daily, Y_pm25, Y_pm10):
         results['pm25'] = pm25_to_percentage(linear_pm25.forecast)
         results['pm10'] = pm10_to_percentage(linear_pm10.forecast)
         
-        publish_values_to_mosquitto(results, forecast_topics[0])
-       
- 
-def nonlinear_hyperparameters_tuning(X_daily, Y_pm25, Y_pm10):
-    hyperparameters_decision_tree = {
-        'max_features': ['sqrt', 'log2', None],
-        'max_depth': [2, 4, 6, 8]
-    }
-    
-    hyperparameters_random_forest = {
-        'max_features': ['sqrt', 'log2', None],
-        'n_estimators': [50, 100, 150, 200, 250],
-        'max_depth': [2, 4, 6, 8]
-    }
+        publish_forecast_values(mqtt_client, results, forecast_topics[0])
 
-    print('\nDecision tree hyperparameters tuning results for PM25:')
-    hyper_tuning(DecisionTreeRegressor(), hyperparameters_decision_tree, X_daily, Y_pm25)
-    
-    print('\nDecision tree hyperparameters tuning results for PM10:')
-    hyper_tuning(DecisionTreeRegressor(), hyperparameters_decision_tree, X_daily, Y_pm10)
-    
-    print('\n\nRandom forest hyperparameters tuning results for PM25:')
-    hyper_tuning(RandomForestRegressor(), hyperparameters_random_forest, X_daily, Y_pm25)
-    
-    print('\nRandom forest hyperparameters tuning results for PM10:')
-    hyper_tuning(RandomForestRegressor(), hyperparameters_random_forest, X_daily, Y_pm10)
- 
- 
 def nonlinear_regression(X_daily, Y_pm25, Y_pm10):
     results = dict()
     print('\n\nDecision tree regression forecast results for PM25:')
@@ -110,22 +69,7 @@ def nonlinear_regression(X_daily, Y_pm25, Y_pm10):
         results['pm25'] = pm25_to_percentage(random_forest_pm25.forecast)
         results['pm10'] = pm10_to_percentage(random_forest_pm10.forecast)
         
-        publish_values_to_mosquitto(results, forecast_topics[1])
-
-
-def xgboost_hyperparameters_tuning(X_daily, Y_pm25, Y_pm10):
-    hyperparameters_xgboost = {
-        'learning_rate': [0.0001, 0.001, 0.01, 0.1],
-        'n_estimators': [50, 100, 200, 500, 1000],
-        'max_depth': [2, 4, 6, 8]
-    }
-
-    print('\n\nXGBoost hyperparameters tuning results for PM25:')
-    hyper_tuning(XGBRegressor(), hyperparameters_xgboost, X_daily, Y_pm25)
-    
-    print('\nXGBoost hyperparameters tuning results for PM10:')
-    hyper_tuning(XGBRegressor(), hyperparameters_xgboost, X_daily, Y_pm10)
-
+        publish_forecast_values(mqtt_client, results, forecast_topics[1])
 
 def xgboost_regression(X_daily, Y_pm25, Y_pm10):
     results = dict()
@@ -142,8 +86,7 @@ def xgboost_regression(X_daily, Y_pm25, Y_pm10):
         results['pm25'] = pm25_to_percentage(xgboost_pm25.forecast)
         results['pm10'] = pm10_to_percentage(xgboost_pm10.forecast)
         
-        publish_values_to_mosquitto(results, forecast_topics[2])
-
+        publish_forecast_values(mqtt_client, results, forecast_topics[2])
 
 def neural_network_regression(Y_pm25, Y_pm10):
     results = dict()
@@ -160,11 +103,11 @@ def neural_network_regression(Y_pm25, Y_pm10):
     #     results['pm25'] = pm25_to_percentage(neural_network_pm25.forecast)
     #     results['pm10'] = pm10_to_percentage(neural_network_pm10.forecast)
         
-    #     publish_values_to_mosquitto(results, forecast_topics[3])
+    #     publish_forecast_values(mqtt_client, results, forecast_topics[3])
 
 
 if __name__ == '__main__':    
-    configure_mqtt_client()
+    configure_mqtt_client(mqtt_client)
     dataframe = get_dataframe()
     
     X_daily = (dataframe['time_of_a_day']) \
