@@ -91,15 +91,15 @@ class NeuralNetworkModel:
         # split into train and test sets
         train, test = supervised_values[0:-1440], supervised_values[-1440:]  # last 1440 samples (1 day) to make a prediction (test)
     
-        self.fit_lstm(supervised_values) ###
+        ### self.fit_lstm(supervised_values) ###
         
         # load model
-        # if self.isPm25:
-        #     model = load_model('pm25_model_45k_500_epochs.h5')
-        # else:
-        #     model = load_model('pm10_model_47k_500_epochs.h5')
+        if self.isPm25:
+            model = load_model('pm25_model_50k_500_epochs.h5')
+        else:
+            model = load_model('pm10_model_50k_500_epochs.h5')
         
-        # self.make_forecast(model, test)
+        self.make_forecast(model, test)
      
     ### fit an LSTM network to training data ###
     def fit_lstm(self, train):
@@ -119,11 +119,10 @@ class NeuralNetworkModel:
             model.fit(X, y, epochs=1, batch_size=1, shuffle=False)
             model.reset_states()
             
-        model.save("pm10_model_50k_500_epochs.h5") ###
-        print("Model saved") ###
+        ### model.save("pm10_model_50k_500_epochs.h5") ###
+        ### print("Model saved") ###
         
-        self.make_forecast(model, train) ###
-
+        ### self.make_forecast(model, train) ###
 
     # forecast with LSTM
     def make_forecast(self, model, test):
