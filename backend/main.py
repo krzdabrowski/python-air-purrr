@@ -18,7 +18,7 @@ from hypertuning import nonlinear_hyperparameters_tuning, xgboost_hyperparameter
 
 
 mqtt_client = paho.mqtt.client.Client(client_id='backend')
-forecast_topics = ['forecast/linear', 'forecast/nonlinear', 'forecast/xgboost', 'forecast/neuralnetwork']
+forecast_topics = ['backend/forecast/linear', 'backend/forecast/nonlinear', 'backend/forecast/xgboost', 'backend/forecast/neuralnetwork']
 
 forecast_linear = dict()
 forecast_nonlinear = dict()
