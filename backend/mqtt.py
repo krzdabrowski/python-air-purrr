@@ -40,44 +40,44 @@ def on_subscribe_changes(client, userdata, flags, rc):
         
 def on_changes_received(client, userdata, msg):
     if msg.topic == fan_topics[0]:
-        if msg.payload == 'on':
+        if msg.payload.decode('UTF-8') == 'on':
             fan_state = True
-        elif msg.payload == 'off':
+        elif msg.payload.decode('UTF-8') == 'off':
             fan_state = False
         else:
             print('Incorrent message payload for fan state')
     if msg.topic == sensor_topics[0]:
-        if msg.payload in fan_states:
+        if msg.payload.decode('UTF-8') in fan_states:
             sensor_state = msg.payload
             check_auto_control_of_air_purifier(client)
         else:
             print('Incorrent message payload for sensor state')
     elif msg.topic == android_topics[0]:
-        if msg.payload == 'on':
+        if msg.payload.decode('UTF-8') == 'on':
             automode_state = True
             check_auto_control_of_air_purifier(client)
-        elif msg.payload == 'off':
+        elif msg.payload.decode('UTF-8') == 'off':
             automode_state = False
             check_auto_control_of_air_purifier(client)
         else:
             print('Incorrent message payload for android automode state')
     elif msg.topic == android_topics[1]:
         try:
-            automode_threshold = int(msg.payload)
+            automode_threshold = int(msg.payload.decode('UTF-8'))
             check_auto_control_of_air_purifier(client)
         except:
             print('Incorrent message payload for android automode threshold')
     elif msg.topic == android_topics[2]:
-        if msg.payload == 'high':
+        if msg.payload.decode('UTF-8') == 'high':
             performancemode_state = True
             check_auto_control_of_air_purifier(client)
-        elif msg.payload == 'low':
+        elif msg.payload.decode('UTF-8') == 'low':
             performancemode_state = False
             check_auto_control_of_air_purifier(client)
         else:
             print('Incorrent message payload for android performancemode state')
     elif msg.topic == android_topics[3]:
-        if msg.payload in forecast_topics:
+        if msg.payload.decode('UTF-8') in forecast_topics:
             forecast_choice = msg.payload
             check_auto_control_of_air_purifier(client)
         else:
