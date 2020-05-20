@@ -1,5 +1,8 @@
 #!/usr/bin/python3.7
 
+import control_purifier
+
+
 mqtt_url = 'backend.airpurrr.eu'
 fan_topics = ['airpurifier/fan/state', 'airpurifier/fan/speed'] 
 sensor_topics = ['airpurifier/sensor/state', 'airpurifier/sensor/pollution']
@@ -22,16 +25,16 @@ def on_subscribe_fan_changes(client, userdata, flags, rc):
 
 def on_fan_changes_received(client, userdata, msg):
     if msg.topic == fan_topics[0]:
-        if msg.payload == 'on':
+        if msg.payload.decode('UTF-8') == 'on':
             control_purifier.turn_on()
-        elif msg.payload == 'off':
+        elif msg.payload.decode('UTF-8') == 'off':
             control_purifier.turn_off()
         else:
             print('Incorrent message payload for fan state')
     elif msg.topic == fan_topics[1]:
-        if msg.payload == 'high':
+        if msg.payload.decode('UTF-8') == 'high':
             control_purifier.high_mode()
-        elif msg.payload == 'low':
+        elif msg.payload.decode('UTF-8') == 'low':
             control_purifier.low_mode()
         else:
             print('Incorrent message payload for fan speed')
