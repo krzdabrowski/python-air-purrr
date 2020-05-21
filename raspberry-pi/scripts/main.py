@@ -21,9 +21,10 @@ import requests
 import paho.mqtt.client
 import control_purifier
 from sds011 import SDS011
-from mqtt import configure_mqtt_client, publish_sensor_workstate, publish_sensor_airpollution
+from utils_mqtt import Mqtt
 
 sensor = SDS011('/dev/ttyUSB0')
+mqtt = Mqtt()
 mqtt_client = paho.mqtt.client.Client(client_id="rpi")
 
 database_url = 'http://backend.airpurrr.eu:8086/write?db=airquality_sds011'
@@ -83,27 +84,29 @@ def go_to_sleep():
 
 if __name__ == '__main__':
     init()
-    configure_mqtt_client(mqtt_client)
+    mqtt.configure_mqtt_client(mqtt_client)
     # send_cached_sensor_airpollution_to_influxdb_if_any()
 
     while True:
         try:
             # measuring
             sensor.workstate = SDS011.WorkStates.Measuring
-            publish_sensor_workstate(mqtt_client, sensor.workstate)
+            mqtt.workstate = SDS011.WorkStates.Measuring
+            mqtt.publish_sensor_workstate(mqtt_client, sensor.workstate)
             airpollution_values = get_sensor_airpollution_values()
             
             # sending data
             sensor.workstate = SDS011.WorkStates.Sleeping
-            publish_sensor_workstate(mqtt_client, sensor.workstate)
+            mqtt.workstate = SDS011.WorkStates.Sleeping
+            mqtt.publish_sensor_workstate(mqtt_client, sensor.workstate)
             time.sleep(3) # TYMCZASOWO ABY MOSQUITTO ZDAZYL OGARNAC
             # send_sensor_airpollution_to_influxdb(airpollution_values)
-            publish_sensor_airpollution(mqtt_client, f'{str(airpollution_values[1])},{str(airpollution_values[0])}')
+            mqtt.publish_sensor_airpollution(mqtt_client, f'{str(airpollution_values[1])},{str(airpollution_values[0])}')
             
             go_to_sleep()
 
         except KeyboardInterrupt:
-            publish_sensor_workstate(mqtt_client, sensor.workstate)
+            mqtt.publish_sensor_workstate(mqtt_client, sensor.workstate)
             sensor.reset()
             sensor = None
             mqtt_client.loop_stop()

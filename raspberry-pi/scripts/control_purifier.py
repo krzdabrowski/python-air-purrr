@@ -31,7 +31,7 @@ def turn_on():
     set_sensor_to_sleep()
 
 def turn_off():
-    print('Turning purifer off...')
+    print('Turning purifier off...')
     
     GPIO.setup(pins_tuple, GPIO.OUT)
     GPIO.output(pins_tuple[-1], GPIO.HIGH)  # pin 16 first
