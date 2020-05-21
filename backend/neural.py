@@ -10,7 +10,7 @@ from keras.layers import Dropout
 from keras.layers import Dense
 from keras.layers import LSTM
 
-from utils import get_input_forecast_formatted_array 
+from utils_calculation import get_input_forecast_formatted_array 
 
 
 class NeuralNetworkModel:

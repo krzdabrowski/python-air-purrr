@@ -1,6 +1,6 @@
 #!/usr/bin/python3.7
 
-from utils import get_input_forecast_formatted_array 
+from utils_calculation import get_input_forecast_formatted_array 
 
 class DailyProfileModel:
     def __init__(self, regressor_type, forecast_hours_ahead = 6):
