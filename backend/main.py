@@ -18,14 +18,17 @@ from utils_calculation import pm25_to_percentage, pm10_to_percentage
 from hypertuning import nonlinear_hyperparameters_tuning, xgboost_hyperparameters_tuning
 
 
+class ForecastResults():
+    linear = dict()
+    nonlinear = dict()
+    xgboost = dict()
+    neural = dict()
+
+
 mqtt = Mqtt()  
 mqtt_client = paho.mqtt.client.Client(client_id='backend')
 forecast_topics = ['backend/forecast/linear', 'backend/forecast/nonlinear', 'backend/forecast/xgboost', 'backend/forecast/neuralnetwork']
-
-forecast_linear = dict()
-forecast_nonlinear = dict()
-forecast_xgboost = dict()
-forecast_neural = dict()
+forecast_results = ForecastResults()
 
 def get_dataframe():
     client = DataFrameClient(database='airquality_sds011')
@@ -136,10 +139,11 @@ if __name__ == '__main__':
     while True:
         print('\n\n##### CALCULATING PREDICTIONS #####')
     
-        # forecast_linear = linear_regression(X_daily, Y_pm25, Y_pm10)
-        # forecast_nonlinear = nonlinear_regression(X_daily, Y_pm25, Y_pm10)
-        # forecast_xgboost = xgboost_regression(X_daily, Y_pm25, Y_pm10)
-        # forecast_neural = neural_network_regression(Y_pm25, Y_pm10)
+        forecast_results.linear = linear_regression(X_daily, Y_pm25, Y_pm10)
+        forecast_results.nonlinear = nonlinear_regression(X_daily, Y_pm25, Y_pm10)
+        forecast_results.xgboost = xgboost_regression(X_daily, Y_pm25, Y_pm10)
+        forecast_results.neural = neural_network_regression(Y_pm25, Y_pm10)
+        mqtt.forecast_results = forecast_results
 
         print('Going to sleep for next 15 minutes...')
         time.sleep(60*15)

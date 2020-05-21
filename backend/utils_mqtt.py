@@ -2,11 +2,11 @@
 
 import json
 
-
 fan_states = ['WorkStates.Sleeping', 'WorkStates.Measuring']
 fan_topics = ['airpurifier/fan/state', 'airpurifier/fan/speed']
 sensor_topics = ['airpurifier/sensor/state']
 android_topics = ['android/automode/state', 'android/automode/threshold', 'android/performancemode/state', 'android/forecast/choice']
+forecast_topics = ['backend/forecast/linear', 'backend/forecast/nonlinear', 'backend/forecast/xgboost', 'backend/forecast/neuralnetwork']
 
 class Mqtt:
     fan_state = False
@@ -15,6 +15,7 @@ class Mqtt:
     automode_threshold = 100
     performancemode_state = False
     forecast_choice = ''
+    forecast_results = None
     
     def configure_mqtt_client(self, client):
         try:
@@ -104,16 +105,8 @@ class Mqtt:
         except:
             print('Error publishing fan speed to Mosquitto')
     
-    def check_auto_control_of_air_purifier(self, client):
-        print(f'\n\nFan state is: {self.fan_state}')
-        print(f'\nSensor state is: {self.sensor_state}')
-    
-        print(f'\nAuto mode is: {self.automode_state}')
-        print(f'\nAuto threshold is: {self.automode_threshold}')
-        print(f'\nPerformance mode is: {self.performancemode_state}')
-        print(f'\nForecast choice is: {self.forecast_choice}')
-        
-        if self.automode_state == False or self.sensor_state == fan_states[1]:  # user doesn't want to use automatic mode, or sensor is in Measuring mode
+    def check_auto_control_of_air_purifier(self, client):       
+        if self.sensor_state == fan_states[1]:
             return
         
         forecast_values = self.select_forecast_of_choice()
@@ -121,7 +114,7 @@ class Mqtt:
         next_forecast_pm10 = forecast_values.get('pm10')[0]
         bigger_forecasted_value = max(next_forecast_pm25, next_forecast_pm10)
         
-        if self.automode_threshold > bigger_forecasted_value:
+        if self.automode_state == False or self.automode_threshold > bigger_forecasted_value:
             if self.fan_state == True:  # turn off air purifier
                 self.fan_state == False
                 self.publish_air_purifier_fan_state(client, 'off')
@@ -134,16 +127,15 @@ class Mqtt:
             else:  # switch to low-speed mode
                 self.publish_air_purifier_fan_speed(client, 'low')
  
-    def select_forecast_of_choice():   
+    def select_forecast_of_choice(self):        
         if self.forecast_choice == forecast_topics[0]:
-            return forecast_linear
+            return self.forecast_results.linear
         elif self.forecast_choice == forecast_topics[1]:
-            return forecast_nonlinear
+            return self.forecast_results.nonlinear
         elif self.forecast_choice == forecast_topics[2]:
-            return forecast_xgboost
+            return self.forecast_results.xgboost
         elif self.forecast_choice == forecast_topics[3]:
-            return forecast_neural
+            return self.forecast_results.neural
         else:
             return dict()
-        
-from main import forecast_topics, forecast_linear, forecast_nonlinear, forecast_xgboost, forecast_neural   
+   
