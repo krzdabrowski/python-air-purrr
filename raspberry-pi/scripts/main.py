@@ -85,21 +85,22 @@ def go_to_sleep():
 if __name__ == '__main__':
     init()
     mqtt.configure_mqtt_client(mqtt_client)
-    send_cached_sensor_airpollution_to_influxdb_if_any()
+    # send_cached_sensor_airpollution_to_influxdb_if_any()
 
     while True:
         try:
-            # pomiar
+            # measuring
             sensor.workstate = SDS011.WorkStates.Measuring
             mqtt.workstate = SDS011.WorkStates.Measuring
             mqtt.publish_sensor_workstate(mqtt_client, sensor.workstate)
             airpollution_values = get_sensor_airpollution_values()
             
-            # wyslanie danych
+            # sending data
             sensor.workstate = SDS011.WorkStates.Sleeping
             mqtt.workstate = SDS011.WorkStates.Sleeping
             mqtt.publish_sensor_workstate(mqtt_client, sensor.workstate)
-            send_sensor_airpollution_to_influxdb(airpollution_values)
+            time.sleep(3) # TYMCZASOWO ABY MOSQUITTO ZDAZYL OGARNAC
+            # send_sensor_airpollution_to_influxdb(airpollution_values)
             mqtt.publish_sensor_airpollution(mqtt_client, f'{str(airpollution_values[1])},{str(airpollution_values[0])}')
             
             go_to_sleep()
