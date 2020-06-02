@@ -122,21 +122,22 @@ def neural_network_regression(Y_pm25, Y_pm10):
 
 if __name__ == '__main__':  
     mqtt.configure_mqtt_client(mqtt_client)
-    dataframe = get_dataframe()
     
-    X_daily = (dataframe['time_of_a_day']) \
-        .values \
-        .astype(np.int64) \
-        .reshape(-1, 1)
-    Y_pm25 = dataframe.pm25.values
-    Y_pm10 = dataframe.pm10.values
-    
-    # print('##### HYPERPARAMETERS TUNING #####')
-    
-    # nonlinear_hyperparameters_tuning(X_daily, Y_pm25, Y_pm10)
-    # xgboost_hyperparameters_tuning(X_daily, Y_pm25, Y_pm10)
-
     while True:
+        dataframe = get_dataframe()
+    
+        X_daily = (dataframe['time_of_a_day']) \
+            .values \
+            .astype(np.int64) \
+            .reshape(-1, 1)
+        Y_pm25 = dataframe.pm25.values
+        Y_pm10 = dataframe.pm10.values
+    
+        print('##### HYPERPARAMETERS TUNING #####')
+    
+        nonlinear_hyperparameters_tuning(X_daily, Y_pm25, Y_pm10)
+        xgboost_hyperparameters_tuning(X_daily, Y_pm25, Y_pm10)
+
         print('\n\n##### CALCULATING PREDICTIONS #####')
     
         forecast_results.linear = linear_regression(X_daily, Y_pm25, Y_pm10)
