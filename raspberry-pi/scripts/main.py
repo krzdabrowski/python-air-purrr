@@ -29,7 +29,7 @@ mqtt_client = paho.mqtt.client.Client(client_id="rpi")
 
 database_url = 'http://backend.airpurrr.eu:8086/write?db=airquality_sds011'
 cache_location = '/home/pi/Desktop/db/cached_db.txt'
-local_database_location = '/home/pi/git-backend-air-purrr/backend-air-purrr/raspberry-pi/flask/local_db.csv'
+local_database_location = '/home/pi/git-backend-air-purrr/backend-air-purrr/raspberry-pi/local_db.csv'
 
 
 def init():
@@ -79,13 +79,13 @@ def send_sensor_airpollution_to_influxdb(values):
 
 def go_to_sleep():
     print('5. Work is done. See you in 30 seconds!')
-    time.sleep(900)  # 30 secs  BYLO 29
+    time.sleep(29)  # 30 secs
 
 
 if __name__ == '__main__':
     init()
     mqtt.configure_mqtt_client(mqtt_client)
-    # send_cached_sensor_airpollution_to_influxdb_if_any()
+    send_cached_sensor_airpollution_to_influxdb_if_any()
 
     while True:
         try:
@@ -99,8 +99,7 @@ if __name__ == '__main__':
             sensor.workstate = SDS011.WorkStates.Sleeping
             mqtt.workstate = SDS011.WorkStates.Sleeping
             mqtt.publish_sensor_workstate(mqtt_client, sensor.workstate)
-            time.sleep(3) # TYMCZASOWO ABY MOSQUITTO ZDAZYL OGARNAC
-            # send_sensor_airpollution_to_influxdb(airpollution_values)
+            send_sensor_airpollution_to_influxdb(airpollution_values)
             mqtt.publish_sensor_airpollution(mqtt_client, f'{str(airpollution_values[1])},{str(airpollution_values[0])}')
             
             go_to_sleep()
