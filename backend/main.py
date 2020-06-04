@@ -166,12 +166,8 @@ if __name__ == '__main__':
         Y_pm25 = dataframe.pm25.values
         Y_pm10 = dataframe.pm10.values
     
-        print('##### HYPERPARAMETERS TUNING #####')
-    
         nonlinear_tuning_params = nonlinear_hyperparameters_tuning(X_daily, Y_pm25, Y_pm10)
         xgboost_tuning_params = xgboost_hyperparameters_tuning(X_daily, Y_pm25, Y_pm10)
-
-        print('\n\n##### CALCULATING PREDICTIONS #####')
     
         forecast_results.linear = linear_regression(X_daily, Y_pm25, Y_pm10)
         forecast_results.nonlinear = nonlinear_regression(X_daily, Y_pm25, Y_pm10, nonlinear_tuning_params)
