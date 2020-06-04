@@ -1,5 +1,6 @@
 #!/usr/bin/python3.7
 
+from datetime import datetime
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
@@ -16,18 +17,21 @@ def nonlinear_hyperparameters_tuning(X_daily, Y_pm25, Y_pm10):
         'n_estimators': [50, 100, 150, 200, 250],
         'max_depth': [2, 4, 6, 8]
     }
-
+    
     print('\nDecision tree hyperparameters tuning results for PM25:')
-    execute_hypertuning(DecisionTreeRegressor(), hyperparameters_decision_tree, X_daily, Y_pm25)
+    result_decision_tree_pm25 = execute_hypertuning(DecisionTreeRegressor(), hyperparameters_decision_tree, X_daily, Y_pm25)
     
     print('\nDecision tree hyperparameters tuning results for PM10:')
-    execute_hypertuning(DecisionTreeRegressor(), hyperparameters_decision_tree, X_daily, Y_pm10)
+    result_decision_tree_pm10 = execute_hypertuning(DecisionTreeRegressor(), hyperparameters_decision_tree, X_daily, Y_pm10)
+        
     
     print('\n\nRandom forest hyperparameters tuning results for PM25:')
-    execute_hypertuning(RandomForestRegressor(), hyperparameters_random_forest, X_daily, Y_pm25)
+    result_random_forest_pm25 = execute_hypertuning(RandomForestRegressor(), hyperparameters_random_forest, X_daily, Y_pm25)
     
     print('\nRandom forest hyperparameters tuning results for PM10:')
-    execute_hypertuning(RandomForestRegressor(), hyperparameters_random_forest, X_daily, Y_pm10)
+    result_random_forest_pm10 = execute_hypertuning(RandomForestRegressor(), hyperparameters_random_forest, X_daily, Y_pm10)
+        
+    return ((result_decision_tree_pm25, result_decision_tree_pm10), (result_random_forest_pm25, result_random_forest_pm10))
     
 def xgboost_hyperparameters_tuning(X_daily, Y_pm25, Y_pm10):
     hyperparameters_xgboost = {
@@ -35,12 +39,19 @@ def xgboost_hyperparameters_tuning(X_daily, Y_pm25, Y_pm10):
         'n_estimators': [50, 100, 200, 500, 1000],
         'max_depth': [2, 4, 6, 8]
     }
+    
+    start_time_xgboost = datetime.now()
 
     print('\n\nXGBoost hyperparameters tuning results for PM25:')
-    execute_hypertuning(XGBRegressor(), hyperparameters_xgboost, X_daily, Y_pm25)
+    result_pm25 = execute_hypertuning(XGBRegressor(), hyperparameters_xgboost, X_daily, Y_pm25)
     
     print('\nXGBoost hyperparameters tuning results for PM10:')
-    execute_hypertuning(XGBRegressor(), hyperparameters_xgboost, X_daily, Y_pm10)
+    result_pm10 = execute_hypertuning(XGBRegressor(), hyperparameters_xgboost, X_daily, Y_pm10)
+    
+    end_time_xgboost = datetime.now() - start_time_xgboost
+    print(f'Execution time for xgboost was: {end_time_xgboost} hours')
+    
+    return (result_pm25, result_pm10)
     
 def execute_hypertuning(model, hyperparameters, X_daily, Y_daily):
     # grid search
@@ -55,3 +66,5 @@ def execute_hypertuning(model, hyperparameters, X_daily, Y_daily):
     params = grid_result.cv_results_['params']
     for mean, stdev, param in zip(means, stds, params):
         print(f'{mean} ({stdev}) with: {param}')
+        
+    return grid_result
