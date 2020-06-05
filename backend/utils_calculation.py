@@ -3,6 +3,7 @@
 import pytz
 import numpy as np
 import pandas as pd
+from datetime import timedelta
 
 
 def get_input_forecast_array(forecast_hours_ahead):
@@ -39,3 +40,7 @@ def pm25_to_percentage(data):
     
 def pm10_to_percentage(data):
     return [round(val * 2, 2) for val in data]
+
+def format_date(value):
+    delta = timedelta(seconds=value[0]/(10 ** 9)) + timedelta(hours=2)  # convert to local time
+    return delta.total_seconds() % (86400) / (60 * 60)  # get hours.minutes in float, with modulo 24-hours (1d2h -> 2h)

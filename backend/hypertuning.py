@@ -5,17 +5,16 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
 from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import KFold
         
 def nonlinear_hyperparameters_tuning(X_daily, Y_pm25, Y_pm10):
     hyperparameters_decision_tree = {
-        'max_features': ['sqrt', 'log2', None],
-        'max_depth': [2, 4, 6, 8]
+        'max_features': ['sqrt', 'log2', None]
     }
     
     hyperparameters_random_forest = {
         'max_features': ['sqrt', 'log2', None],
-        'n_estimators': [50, 100, 150, 200, 250],
-        'max_depth': [2, 4, 6, 8]
+        'n_estimators': [50, 100, 150, 200, 250]
     }
     
     print('\nDecision tree hyperparameters tuning results for PM25:')
@@ -35,9 +34,8 @@ def nonlinear_hyperparameters_tuning(X_daily, Y_pm25, Y_pm10):
     
 def xgboost_hyperparameters_tuning(X_daily, Y_pm25, Y_pm10):
     hyperparameters_xgboost = {
-        'learning_rate': [0.0001, 0.001, 0.01, 0.1],
+        'learning_rate': [0.001, 0.01, 0.1, 0.3],
         'n_estimators': [50, 100, 200, 500, 1000],
-        'max_depth': [2, 4, 6, 8]
     }
     
     start_time_xgboost = datetime.now()
@@ -55,7 +53,8 @@ def xgboost_hyperparameters_tuning(X_daily, Y_pm25, Y_pm10):
     
 def execute_hypertuning(model, hyperparameters, X_daily, Y_daily):
     # grid search
-    grid_search = GridSearchCV(model, hyperparameters, scoring="neg_mean_squared_error", n_jobs=-1, cv=5)
+    cv_test= KFold(n_splits=5)
+    grid_search = GridSearchCV(model, hyperparameters, scoring='neg_mean_squared_error', n_jobs=-1, cv=cv_test)
     grid_result = grid_search.fit(X_daily, Y_daily)
 
     # summarize results

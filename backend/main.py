@@ -11,11 +11,12 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
 from datetime import datetime
+from matplotlib import pyplot as plt
 
 from daily_profile import DailyProfileModel
 from neural import NeuralNetworkModel
 from utils_mqtt import Mqtt
-from utils_calculation import pm25_to_percentage, pm10_to_percentage
+from utils_calculation import pm25_to_percentage, pm10_to_percentage, format_date
 from hypertuning import nonlinear_hyperparameters_tuning, xgboost_hyperparameters_tuning
 
 
@@ -38,6 +39,19 @@ def get_dataframe():
     dataframe['time_of_a_day'] = pd.to_timedelta(dataframe.index.strftime('%H:%M:%S'))  # additional column to ease daily profile's creation
     
     return dataframe
+    
+def create_daily_profile_plot(X, Y):    
+    X_formatted = np.apply_along_axis(format_date, 1, X)
+        
+    plt.xlabel("Godzina") 
+    plt.ylabel("PM2.5") 
+    ax = plt.gca()
+    ax.set_xticks([0.01, 6, 12, 18, 23.999])
+    ax.set_xticklabels(['00:00', '06:00', '12:00', '18:00', '24:00'])
+
+    plt.plot(X_formatted, Y, '.', markersize=1)
+    plt.margins(0,0)
+    plt.savefig('daily_profile_plot.png', bbox_inches='tight', dpi=450)
     
 def linear_regression(X_daily, Y_pm25, Y_pm10):
     start_time = datetime.now()
@@ -62,18 +76,16 @@ def linear_regression(X_daily, Y_pm25, Y_pm10):
         mqtt.publish_forecast_values(mqtt_client, results, forecast_topics[0])
     return results
 
-def nonlinear_regression(X_daily, Y_pm25, Y_pm10, nonlinear_tuning_params):
+def nonlinear_regression(X_daily, Y_pm25, Y_pm10):
     start_time_decision_tree = datetime.now()
     results = dict()
     
     print('\n\nDecision tree regression forecast results for PM25:')
-    best_decisiontree_pm25_params = nonlinear_tuning_params[0][0].best_params_
-    decision_tree_pm25 = DailyProfileModel(regressor_type=DecisionTreeRegressor(max_depth=best_decisiontree_pm25_params['max_depth'], max_features=best_decisiontree_pm25_params['max_features']))
+    decision_tree_pm25 = DailyProfileModel(regressor_type=DecisionTreeRegressor(max_features='sqrt'))
     decision_tree_pm25.calculate_regression(X_daily, Y_pm25)
     
     print('\nDecision tree regression forecast results for PM10:')
-    best_decisiontree_pm10_params = nonlinear_tuning_params[0][1].best_params_
-    decision_tree_pm10 = DailyProfileModel(regressor_type=DecisionTreeRegressor(max_depth=best_decisiontree_pm10_params['max_depth'], max_features=best_decisiontree_pm10_params['max_features']))
+    decision_tree_pm10 = DailyProfileModel(regressor_type=DecisionTreeRegressor(max_features='sqrt'))
     decision_tree_pm10.calculate_regression(X_daily, Y_pm10)
     
     end_time_decision_tree = datetime.now() - start_time_decision_tree
@@ -83,13 +95,11 @@ def nonlinear_regression(X_daily, Y_pm25, Y_pm10, nonlinear_tuning_params):
     start_time_random_forest = datetime.now()
     
     print('\n\nRandom forest regression forecast results for PM25:')
-    best_randomforest_pm25_params = nonlinear_tuning_params[1][0].best_params_
-    random_forest_pm25 = DailyProfileModel(regressor_type=RandomForestRegressor(max_depth=best_randomforest_pm25_params['max_depth'], max_features=best_randomforest_pm25_params['max_features'], n_estimators=best_randomforest_pm25_params['n_estimators']))
+    random_forest_pm25 = DailyProfileModel(regressor_type=RandomForestRegressor(max_features=None, n_estimators=250))
     random_forest_pm25.calculate_regression(X_daily, Y_pm25)
         
     print('\nRandom forest regression forecast results for PM10:')
-    best_randomforest_pm10_params = nonlinear_tuning_params[1][1].best_params_
-    random_forest_pm10 = DailyProfileModel(regressor_type=RandomForestRegressor(max_depth=best_randomforest_pm10_params['max_depth'], max_features=best_randomforest_pm10_params['max_features'], n_estimators=best_randomforest_pm10_params['n_estimators']))
+    random_forest_pm10 = DailyProfileModel(regressor_type=RandomForestRegressor(max_features='log2', n_estimators=250))
     random_forest_pm10.calculate_regression(X_daily, Y_pm10)
     
     end_time_random_forest = datetime.now() - start_time_random_forest
@@ -104,18 +114,16 @@ def nonlinear_regression(X_daily, Y_pm25, Y_pm10, nonlinear_tuning_params):
         mqtt.publish_forecast_values(mqtt_client, results, forecast_topics[1])
     return results
 
-def xgboost_regression(X_daily, Y_pm25, Y_pm10, xgboost_tuning_params):
+def xgboost_regression(X_daily, Y_pm25, Y_pm10):
     start_time = datetime.now()
     results = dict()
     
     print('\n\nXGBoost regression forecast results for PM25:')
-    best_xgboost_pm25_params = xgboost_tuning_params[0].best_params_
-    xgboost_pm25 = DailyProfileModel(regressor_type=XGBRegressor(n_estimators=best_xgboost_pm25_params['n_estimators'], max_depth=best_xgboost_pm25_params['max_depth'], learning_rate=best_xgboost_pm25_params['learning_rate']))
+    xgboost_pm25 = DailyProfileModel(regressor_type=XGBRegressor(n_estimators=200, learning_rate=0.01))
     xgboost_pm25.calculate_regression(X_daily, Y_pm25)
     
     print('\nXGBoost regression forecast results for PM10:')
-    best_xgboost_pm10_params = xgboost_tuning_params[1].best_params_
-    xgboost_pm10 = DailyProfileModel(regressor_type=XGBRegressor(n_estimators=best_xgboost_pm10_params['n_estimators'], max_depth=best_xgboost_pm10_params['max_depth'], learning_rate=best_xgboost_pm10_params['learning_rate']))
+    xgboost_pm10 = DailyProfileModel(regressor_type=XGBRegressor(n_estimators=200, learning_rate=0.01))
     xgboost_pm10.calculate_regression(X_daily, Y_pm10)
     
     end_time = datetime.now() - start_time
@@ -166,16 +174,18 @@ if __name__ == '__main__':
         Y_pm25 = dataframe.pm25.values
         Y_pm10 = dataframe.pm10.values
     
-        print('##### HYPERPARAMETERS TUNING #####')
+        # create_daily_profile_plot(X_daily, Y_pm25)
+
+        # print('##### HYPERPARAMETERS TUNING #####')
     
-        nonlinear_tuning_params = nonlinear_hyperparameters_tuning(X_daily, Y_pm25, Y_pm10)
-        xgboost_tuning_params = xgboost_hyperparameters_tuning(X_daily, Y_pm25, Y_pm10)
+        # nonlinear_tuning_params = nonlinear_hyperparameters_tuning(X_daily, Y_pm25, Y_pm10)
+        # xgboost_tuning_params = xgboost_hyperparameters_tuning(X_daily, Y_pm25, Y_pm10)
 
         print('\n\n##### CALCULATING PREDICTIONS #####')
     
         forecast_results.linear = linear_regression(X_daily, Y_pm25, Y_pm10)
-        forecast_results.nonlinear = nonlinear_regression(X_daily, Y_pm25, Y_pm10, nonlinear_tuning_params)
-        forecast_results.xgboost = xgboost_regression(X_daily, Y_pm25, Y_pm10, xgboost_tuning_params)
+        forecast_results.nonlinear = nonlinear_regression(X_daily, Y_pm25, Y_pm10)
+        forecast_results.xgboost = xgboost_regression(X_daily, Y_pm25, Y_pm10)
         forecast_results.neural = neural_network_regression(Y_pm25, Y_pm10)
         mqtt.forecast_results = forecast_results
 
