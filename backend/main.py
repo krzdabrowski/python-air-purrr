@@ -44,7 +44,7 @@ def create_daily_profile_plot(X, Y):
     X_formatted = np.apply_along_axis(format_date, 1, X)
         
     plt.xlabel("Godzina") 
-    plt.ylabel("PM2.5") 
+    plt.ylabel(u"$PM_{10}\ [\u03bcg/m^3]$") 
     ax = plt.gca()
     ax.set_xticks([0.01, 6, 12, 18, 23.999])
     ax.set_xticklabels(['00:00', '06:00', '12:00', '18:00', '24:00'])
@@ -174,7 +174,7 @@ if __name__ == '__main__':
         Y_pm25 = dataframe.pm25.values
         Y_pm10 = dataframe.pm10.values
     
-        # create_daily_profile_plot(X_daily, Y_pm25)
+        # create_daily_profile_plot(X_daily, Y_pm10)
 
         # print('##### HYPERPARAMETERS TUNING #####')
     
