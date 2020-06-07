@@ -69,17 +69,20 @@ if __name__ == '__main__':
     Y_day2_pm10_real_airly = [19.11, 21.4, 22.5, 21.03, 21.06, 21.99, 16.09, 15.84, 16.67, 18.06, 18.91, 19.44, 17.34, 12.47, 14.87, 17.96, 19.95, 22.44]
     
     # day 3
-    Y_day3_pm25_pred_airly = []
-    Y_day3_pm10_pred_airly = []
+    Y_day3_pm25_pred_airly = [9.5, 8.74, 7.55, 6.31, 5.45, 4.6, 8.51, 7.9, 7.98, 7.48, 8.18, 8.74]
+    Y_day3_pm10_pred_airly = [13.52, 12.61, 10.7, 8.66, 7.26, 6.36, 12.6, 11.9, 11.4, 11.19, 11.77, 12.72]
     
-    Y_day3_pm25_real_airly = []
-    Y_day3_pm10_real_airly = []
+    Y_day3_pm25_real_airly = [11.72, 8.76, 10.06, 13.64, 14.61, 15.06]
+    Y_day3_pm10_real_airly = [15.24, 11.4, 13.03, 17.8, 19.05, 19.58]
     
-    plot_airly('PM_{2,5}', Y_day1_pm25_pred_airly, Y_day1_pm25_real_airly, 'day1_airly_pm25.png')
-    plot_airly('PM_{10}', Y_day1_pm10_pred_airly, Y_day1_pm10_real_airly, 'day1_airly_pm10.png')
+    #plot_airly('PM_{2,5}', Y_day1_pm25_pred_airly, Y_day1_pm25_real_airly, 'day1_airly_pm25.png')
+    #plot_airly('PM_{10}', Y_day1_pm10_pred_airly, Y_day1_pm10_real_airly, 'day1_airly_pm10.png')
     
-    plot_airly('PM_{2,5}', Y_day2_pm25_pred_airly, Y_day2_pm25_real_airly, 'day2_airly_pm25.png')
-    plot_airly('PM_{10}', Y_day2_pm10_pred_airly, Y_day2_pm10_real_airly, 'day2_airly_pm10.png')
+    #plot_airly('PM_{2,5}', Y_day2_pm25_pred_airly, Y_day2_pm25_real_airly, 'day2_airly_pm25.png')
+    #plot_airly('PM_{10}', Y_day2_pm10_pred_airly, Y_day2_pm10_real_airly, 'day2_airly_pm10.png')
+    
+    plot_airly('PM_{2,5}', Y_day3_pm25_pred_airly, Y_day3_pm25_real_airly, 'day3_airly_pm25.png')
+    plot_airly('PM_{10}', Y_day3_pm10_pred_airly, Y_day3_pm10_real_airly, 'day3_airly_pm10.png')
     
     
     ### PURIFIER ###
@@ -101,6 +104,7 @@ if __name__ == '__main__':
     Y_day1_pm25_real_purifier = [3.6, 2.7, 2.1, 2.0, 3.4, 1.4, 2.4, 2.0, 1.9, 1.6, 2.9, 5.8, 4.0, 2.7, 2.6, 2.9, 3.4, 3.1]
     Y_day1_pm10_real_purifier = [4.4, 3.8, 4.9, 2.6, 8.8, 1.6, 3.1, 3.6, 2.3, 1.7, 9.2, 10.2, 8.6, 5.0, 3.4, 3.9, 4.5, 3.7]
 
+
     # day 2
     Y_day2_pm25_pred_linear = [6.99779842, 6.8600974, 6.72239639, 6.58469537, 6.44699436, 6.30929334, 6.15038296, 6.01449705, 5.87861114, 5.74272523, 5.60683931, 5.4709534, 5.33378578, 5.19817217, 5.06255856, 4.92694495, 4.79133134, 4.65571774]
     Y_day2_pm10_pred_linear = [10.34120426, 10.20726497, 10.07332569, 9.9393864, 9.80544712, 9.6715078, 9.5104224,  9.37874502, 9.24706763, 9.11539024, 8.98371285, 8.85203546, 8.74334873, 8.61319288, 8.48303704, 8.35288119, 8.22272535, 8.0925695]
@@ -117,24 +121,28 @@ if __name__ == '__main__':
     Y_day2_pm25_real_purifier = [2.6, 4.0, 3.9, 4.7, 4.2, 3.7, 2.4, 3.9, 7.7, 3.4, 27.2, 3.8, 2.6, 2.0, 2.4, 2.7, 2.5, 3.4]
     Y_day2_pm10_real_purifier = [3.1, 7.8, 6.9, 5.8, 5.7, 5.3, 3.9, 8.6, 14.5, 6.9, 83.4, 8.8, 3.9, 3.0, 3.7, 3.3, 3.5, 3.8]
     
+    
     # day 3
-    Y_day3_pm25_pred_linear = []
-    Y_day3_pm10_pred_linear = []
+    Y_day3_pm25_pred_linear = [6.79894119, 6.6669243, 6.53490741, 6.40289052, 6.27087363, 6.13885673, 5.98140418, 5.85166067, 5.72191716, 5.59217365, 5.46243014, 5.33268664]
+    Y_day3_pm10_pred_linear = [10.05279973, 9.92535354, 9.79790736, 9.67046118, 9.543015, 9.41556881, 9.24847379, 9.12457559, 9.00067739, 8.87677918, 8.75288098, 8.62898278]
     
-    Y_day3_pm25_pred_nonlinear = []
-    Y_day3_pm10_pred_nonlinear = []
+    Y_day3_pm25_pred_nonlinear = [ 5.0844, 6.03346667, 4.5548, 8.6056, 2.2756, 2.55793333, 1.72882762, 5.02219, 1.92937333, 2.556, 4.42283333, 4.79046667]
+    Y_day3_pm10_pred_nonlinear = [ 7.8856, 9.74427429, 9.5904, 12.0124, 3.9184, 5.57814, 2.86716889, 7.47311143, 4.28666667, 3.171, 11.61482667, 10.33836667]
     
-    Y_day3_pm25_pred_xgboost = []
-    Y_day3_pm10_pred_xgboost = []
+    Y_day3_pm25_pred_xgboost = [6.9881535, 7.7023273, 5.840645, 5.3938494, 4.7039685, 3.8122482, 3.2821496, 3.0222178, 3.0222178, 3.4844248, 6.0045433, 4.447092]
+    Y_day3_pm10_pred_xgboost = [9.201234, 12.403847, 12.273071, 8.361192, 7.6512585, 6.010355, 5.374178, 4.659411, 4.659411, 6.1496143, 14.869055, 9.41091]
     
-    Y_day3_pm25_pred_neural = []
-    Y_day3_pm10_pred_neural = []
+    Y_day3_pm25_pred_neural = [1.790256951516494, 2.1330234810840922, 1.5897927115103814, 1.68914009930013, 3.520697838196793, 4.445109260304162, 3.2902569515164943, 3.6330234810840922, 3.0897927115103814, 3.18914009930013, 5.020697838196793, 5.945109260304162]
+    Y_day3_pm10_pred_neural = [3.4549034120049327, 3.7022324350313283, 3.00665718727978, 3.293433965276927, 7.487284040695522, 25.89971274199197, 4.454903412004933, 4.702232435031329, 4.00665718727978, 4.293433965276927, 8.487284040695522, 26.89971274199197]
     
-    Y_day3_pm25_real_purifier = []
-    Y_day3_pm10_real_purifier = []
+    Y_day3_pm25_real_purifier = [1.6, 1.5, 2.0, 2.9, 4.1, 3.6]
+    Y_day3_pm10_real_purifier = [1.9, 1.6, 2.2, 3.2, 7.2, 5.2]
     
     plot_purifier('PM_{2,5}', Y_day1_pm25_pred_linear, Y_day1_pm25_pred_nonlinear, Y_day1_pm25_pred_xgboost, Y_day1_pm25_pred_neural, Y_day1_pm25_real_purifier, 'day1_purifier_pm25.png')
     plot_purifier('PM_{10}', Y_day1_pm10_pred_linear, Y_day1_pm10_pred_nonlinear, Y_day1_pm10_pred_xgboost, Y_day1_pm10_pred_neural, Y_day1_pm10_real_purifier, 'day1_purifier_pm10.png')
     
     plot_purifier('PM_{2,5}', Y_day2_pm25_pred_linear, Y_day2_pm25_pred_nonlinear, Y_day2_pm25_pred_xgboost, Y_day2_pm25_pred_neural, Y_day2_pm25_real_purifier, 'day2_purifier_pm25.png')
     plot_purifier('PM_{10}', Y_day2_pm10_pred_linear, Y_day2_pm10_pred_nonlinear, Y_day2_pm10_pred_xgboost, Y_day2_pm10_pred_neural, Y_day2_pm10_real_purifier, 'day2_purifier_pm10.png')
+    
+    plot_purifier('PM_{2,5}', Y_day3_pm25_pred_linear, Y_day3_pm25_pred_nonlinear, Y_day3_pm25_pred_xgboost, Y_day3_pm25_pred_neural, Y_day3_pm25_real_purifier, 'day3_purifier_pm25.png')
+    plot_purifier('PM_{10}', Y_day3_pm10_pred_linear, Y_day3_pm10_pred_nonlinear, Y_day3_pm10_pred_xgboost, Y_day3_pm10_pred_neural, Y_day3_pm10_real_purifier, 'day3_purifier_pm10.png')
