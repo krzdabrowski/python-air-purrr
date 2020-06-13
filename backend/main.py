@@ -36,6 +36,7 @@ def get_dataframe():
     client = DataFrameClient(database='airquality_sds011')
     query_result = client.query('SELECT * FROM indoors_pollution;')
     dataframe = query_result['indoors_pollution']
+    # dataframe = dataframe[1000:]
     dataframe['time_of_a_day'] = pd.to_timedelta(dataframe.index.strftime('%H:%M:%S'))  # additional column to ease daily profile's creation
     
     return dataframe
