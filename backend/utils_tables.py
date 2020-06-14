@@ -4,7 +4,37 @@ import numpy as np
 from statistics import mean
 from utils_calculation import rmse
 
-################################################################################################### DATA ###################################################################################################
+################################################################################################### AIRLY DATA ###################################################################################################
+    
+# day 1
+Y_day1_pm25_pred_airly = [11.65, 10.8, 10.41, 9.08, 8.86, 8.44, 6.66, 5.85, 5.66, 5.01, 4.36, 4.25, 5.05, 6.89, 8.66, 10.89, 11.21, 10.94]
+Y_day1_pm10_pred_airly = [17.07, 16.07, 14.91, 13.5, 13.03, 12.26, 9.09, 8.33, 7.5, 6.68, 5.8, 5.38, 6.86, 9.51, 12.81, 15.83, 17.19, 16.49]
+
+Y_day1_pm25_real_airly = [14.39, 9.64, 6.58, 7.05, 6.86, 4.58, 6.35, 5.71, 5.35, 5.21, 5.19, 5.53, 7.44, 7.89, 8.4, 10.34, 11.47, 10.57]
+Y_day1_pm10_real_airly = [19.35, 12.7, 8.63, 9.16, 8.81, 5.94, 8.3, 7.43, 6.94, 6.77, 6.72, 7.16, 9.7, 10.32, 11.0, 13.62, 15.08, 13.99]
+
+# day 2
+Y_day2_pm25_pred_airly = [10.8, 10.57, 10.29, 9.55, 9.25, 9.55, 11.75, 10.91, 10.67, 10.23, 10.69, 11.04, 10.62, 11.76, 11.93, 12.53, 12.44, 11.68]
+Y_day2_pm10_pred_airly = [16.64, 16.03, 15.21, 14.19, 13.93, 13.96, 17.54, 16.3, 15.96, 15.58, 15.89, 16.11, 16.28, 17.21, 18.09, 18.74, 19.03, 18.02]
+
+Y_day2_pm25_real_airly = [14.53, 16.36, 17.28, 16.16, 16.2, 16.98, 12.42, 12.33, 12.94, 13.84, 14.59, 14.63, 13.66, 9.49, 11.14, 13.52, 15.0, 16.73]
+Y_day2_pm10_real_airly = [19.11, 21.4, 22.5, 21.03, 21.06, 21.99, 16.09, 15.84, 16.67, 18.06, 18.91, 19.44, 17.34, 12.47, 14.87, 17.96, 19.95, 22.44]
+
+# day 3
+Y_day3_pm25_pred_airly = [9.5, 8.74, 7.55, 6.31, 5.45, 4.6, 8.51, 7.9, 7.98, 7.48, 8.18, 8.74, 9.35, 10.19, 10.43, 11.18, 11.3, 10.91]
+Y_day3_pm10_pred_airly = [13.52, 12.61, 10.7, 8.66, 7.26, 6.36, 12.6, 11.9, 11.4, 11.19, 11.77, 12.72, 14.16, 15.2, 15.87, 16.27, 16.31, 16.06]
+
+Y_day3_pm25_real_airly = [11.72, 8.76, 10.06, 13.64, 14.61, 15.06, 15.62, 14.26, 11.71, 11.44, 12.5, 12.88, 12.4, 14.68, 6.86, 6.21, 6.51, 8.44]
+Y_day3_pm10_real_airly = [15.24, 11.4, 13.03, 17.8, 19.05, 19.58, 20.23, 18.52, 15.14, 14.73, 16.14, 16.54, 15.98, 19.0, 9.19, 8.37, 8.69, 11.33]
+
+# day 4
+Y_day4_pm25_pred_airly = [24.24, 24.44, 23.48, 22.17, 20.64, 19.67, 16.88, 16.63, 16.28, 15.74, 15.0, 15.46, 15.47, 17.51, 18.86, 20.15, 22.55, 23.61]
+Y_day4_pm10_pred_airly = [38.48, 37.39, 35.91, 34.22, 32.29, 30.72, 25.21, 24.73, 24.04, 23.4, 22.97, 22.73, 22.47, 25.84, 28.82, 31.92, 34.31, 35.62]
+
+Y_day4_pm25_real_airly = [23.36, 23.63, 21.86, 22.44, 21.84, 21.01, 19.28, 18.64, 18.58, 17.27, 15.9, 16.91, 18.15, 17.49, 19.09, 13.93, 2.63, 4.14]
+Y_day4_pm10_real_airly = [33.64, 34.24, 30.37, 31.26, 30.02, 28.34, 25.9, 24.95, 24.78, 22.94, 21.3, 22.46, 24.41, 23.52, 25.68, 18.65, 3.54, 5.6]
+
+################################################################################################### PURIFIER DATA ###################################################################################################
 
 # day 1
 Y_day1_pm25_pred_linear = [7.07738002, 6.93705354, 6.79672706, 6.65640058, 6.5160741, 6.37574762, 6.23542114, 6.09509466, 5.95476817, 5.81444169, 5.6741152, 5.53378872, 5.37517152, 5.2346255, 5.09407947, 4.95353345, 4.81298743, 4.67244141]
@@ -95,8 +125,6 @@ r2_day1_pm25_nonlinear = [0.666, 0.675, 0.674]
 r2_day1_pm10_nonlinear = [0.646, 0.655, 0.651]
 r2_day1_pm25_xgboost = [0.088, 0.093, 0.094]
 r2_day1_pm10_xgboost = [0.079, 0.080, 0.081]
-#r2_day1_pm25_neural = []
-#r2_day1_pm10_neural = []
 
 
 r2_day2_pm25_linear = [0.028, 0.028, 0.028]
@@ -105,8 +133,6 @@ r2_day2_pm25_nonlinear = [0.672, 0.668, 0.668]
 r2_day2_pm10_nonlinear = [0.651, 0.644, 0.647]
 r2_day2_pm25_xgboost = [0.090, 0.089, 0.089]
 r2_day2_pm10_xgboost = [0.079, 0.078, 0.080]
-#r2_day2_pm25_neural = []
-#r2_day2_pm10_neural = []
 
 
 r2_day3_pm25_linear = [0.027, 0.026, 0.026]
@@ -115,8 +141,6 @@ r2_day3_pm25_nonlinear = [0.661, 0.657, 0.657]
 r2_day3_pm10_nonlinear = [0.643, 0.635, 0.631]
 r2_day3_pm25_xgboost = [0.085, 0.083, 0.083]
 r2_day3_pm10_xgboost = [0.077, 0.075, 0.075]
-#r2_day3_pm25_neural = []
-#r2_day3_pm10_neural = []
 
 
 r2_day4_pm25_linear = [0.024, 0.024, 0.024]
@@ -125,8 +149,7 @@ r2_day4_pm25_nonlinear = [0.642, 0.641, 0.639]
 r2_day4_pm10_nonlinear = [0.621, 0.621, 0.620]
 r2_day4_pm25_xgboost = [0.074, 0.074, 0.071]
 r2_day4_pm10_xgboost = [0.070, 0.069, 0.069]
-#r2_day4_pm25_neural = []
-#r2_day4_pm10_neural = []
+
 
 ################################################################################################### TIME ###################################################################################################
 
@@ -155,7 +178,33 @@ times_day4_neural = [75.103, 48.491, 57.294]
 
     
 if __name__ == '__main__':
-    ### RMSE ###
+    ### AIRLY RMSE ###
+    airly_rmse_val1_pm25 = rmse(np.array(Y_day1_pm25_pred_airly), np.array(Y_day1_pm25_real_airly))
+    airly_rmse_val1_pm10 = rmse(np.array(Y_day1_pm10_pred_airly), np.array(Y_day1_pm10_real_airly))
+    airly_rmse_val2_pm25 = rmse(np.array(Y_day2_pm25_pred_airly), np.array(Y_day2_pm25_real_airly))
+    airly_rmse_val2_pm10 = rmse(np.array(Y_day2_pm10_pred_airly), np.array(Y_day2_pm10_real_airly))
+    airly_rmse_val3_pm25 = rmse(np.array(Y_day3_pm25_pred_airly), np.array(Y_day3_pm25_real_airly))
+    airly_rmse_val3_pm10 = rmse(np.array(Y_day3_pm10_pred_airly), np.array(Y_day3_pm10_real_airly))
+    airly_rmse_val4_pm25 = rmse(np.array(Y_day4_pm25_pred_airly), np.array(Y_day4_pm25_real_airly))
+    airly_rmse_val4_pm10 = rmse(np.array(Y_day4_pm10_pred_airly), np.array(Y_day4_pm10_real_airly))
+    
+    airly_rmse_val_mean_pm25 = mean([airly_rmse_val1_pm25, airly_rmse_val2_pm25, airly_rmse_val3_pm25, airly_rmse_val4_pm25])
+    airly_rmse_val_mean_pm10 = mean([airly_rmse_val1_pm10, airly_rmse_val2_pm10, airly_rmse_val3_pm10, airly_rmse_val4_pm10])
+    
+    print(f'Airly RMSE day 1 PM2.5: {airly_rmse_val1_pm25:.3f}')
+    print(f'Airly RMSE day 1 PM10: {airly_rmse_val1_pm10:.3f}\n')
+    print(f'Airly RMSE day 2 PM2.5: {airly_rmse_val2_pm25:.3f}')
+    print(f'Airly RMSE day 2 PM10: {airly_rmse_val2_pm10:.3f}\n')
+    print(f'Airly RMSE day 3 PM2.5: {airly_rmse_val3_pm25:.3f}')
+    print(f'Airly RMSE day 3 PM10: {airly_rmse_val3_pm10:.3f}\n')
+    print(f'Airly RMSE day 4 PM2.5: {airly_rmse_val4_pm25:.3f}')
+    print(f'Airly RMSE day 4 PM10: {airly_rmse_val4_pm10:.3f}')
+    
+    print(f'Airly RMSE mean PM2.5: {airly_rmse_val_mean_pm25:.3f}')
+    print(f'Airly RMSE mean PM10: {airly_rmse_val_mean_pm10:.3f}')
+
+
+    ### PURIFIER RMSE ###
     rmse_val1_pm25 = rmse(np.array(Y_day1_pm25_pred_xgboost), np.array(Y_day1_pm25_real_purifier))
     rmse_val1_pm10 = rmse(np.array(Y_day1_pm10_pred_xgboost), np.array(Y_day1_pm10_real_purifier))
     rmse_val2_pm25 = rmse(np.array(Y_day2_pm25_pred_xgboost), np.array(Y_day2_pm25_real_purifier))
