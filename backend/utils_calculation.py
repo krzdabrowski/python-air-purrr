@@ -44,3 +44,6 @@ def pm10_to_percentage(data):
 def format_date(value):
     delta = timedelta(seconds=value[0]/(10 ** 9)) + timedelta(hours=2)  # convert to local time
     return delta.total_seconds() % (86400) / (60 * 60)  # get hours.minutes in float, with modulo 24-hours (1d2h -> 2h)
+    
+def rmse(predictions, targets):
+    return np.sqrt(((predictions - targets) ** 2).mean())
