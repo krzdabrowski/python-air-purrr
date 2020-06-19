@@ -185,8 +185,8 @@ if __name__ == '__main__':
 
         print('\n\n##### CALCULATING PREDICTIONS #####')
     
-        # forecast_results.linear = linear_regression(X_daily, Y_pm25, Y_pm10)
-        # forecast_results.nonlinear = nonlinear_regression(X_daily, Y_pm25, Y_pm10)
-        # forecast_results.xgboost = xgboost_regression(X_daily, Y_pm25, Y_pm10)
+        forecast_results.linear = linear_regression(X_daily, Y_pm25, Y_pm10)
+        forecast_results.nonlinear = nonlinear_regression(X_daily, Y_pm25, Y_pm10)
+        forecast_results.xgboost = xgboost_regression(X_daily, Y_pm25, Y_pm10)
         forecast_results.neural = neural_network_regression(Y_pm25, Y_pm10)
         mqtt.forecast_results = forecast_results
