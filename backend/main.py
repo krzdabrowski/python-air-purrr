@@ -36,7 +36,8 @@ def get_dataframe():
     client = DataFrameClient(database='airquality_sds011')
     query_result = client.query('SELECT * FROM indoors_pollution;')
     dataframe = query_result['indoors_pollution']
-    # dataframe = dataframe[1000:]
+    dfs = [dataframe[:50000], dataframe[-2000:]]  # prevent MemoryError by taking 50k data from model and last 2000 data for test dataset
+    dataframe = pd.concat(dfs)
     dataframe['time_of_a_day'] = pd.to_timedelta(dataframe.index.strftime('%H:%M:%S'))  # additional column to ease daily profile's creation
     
     return dataframe
@@ -184,11 +185,8 @@ if __name__ == '__main__':
 
         print('\n\n##### CALCULATING PREDICTIONS #####')
     
-        forecast_results.linear = linear_regression(X_daily, Y_pm25, Y_pm10)
-        forecast_results.nonlinear = nonlinear_regression(X_daily, Y_pm25, Y_pm10)
-        forecast_results.xgboost = xgboost_regression(X_daily, Y_pm25, Y_pm10)
+        # forecast_results.linear = linear_regression(X_daily, Y_pm25, Y_pm10)
+        # forecast_results.nonlinear = nonlinear_regression(X_daily, Y_pm25, Y_pm10)
+        # forecast_results.xgboost = xgboost_regression(X_daily, Y_pm25, Y_pm10)
         forecast_results.neural = neural_network_regression(Y_pm25, Y_pm10)
         mqtt.forecast_results = forecast_results
-
-        print('Going to sleep for next 15 minutes...')
-        time.sleep(60*15)
